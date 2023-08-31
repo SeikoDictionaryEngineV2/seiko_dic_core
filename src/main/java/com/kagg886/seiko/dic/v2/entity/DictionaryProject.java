@@ -17,7 +17,7 @@ import java.util.Objects;
  **/
 public class DictionaryProject {
     //这个词库的路径。若为单文件则为词库本身，若为文件夹则为内部的index.txt
-    private File rootFile;
+    private final File rootFile;
     //主词库文件。只有主词库才能被用户触发
     private DictionaryFile indexFile;
 
@@ -38,6 +38,7 @@ public class DictionaryProject {
     }
 
     //解析上下文方法
+    //TODO need implemented
     private void initContextFunctions() {
         File f = rootFile.toPath().resolve("func").toFile();
         for (File jarOrDex : Objects.requireNonNull(f.listFiles())) {
@@ -71,6 +72,7 @@ public class DictionaryProject {
         }
     }
 
+    //返回词库工程的名字
     public String getName() {
         return rootFile.getName();
     }

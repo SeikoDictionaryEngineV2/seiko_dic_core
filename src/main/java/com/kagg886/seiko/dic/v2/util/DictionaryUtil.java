@@ -1,14 +1,10 @@
 package com.kagg886.seiko.dic.v2.util;
 
 import com.kagg886.seiko.dic.v2.exception.DictionaryOnRunningException;
-import com.kagg886.seiko.dic.v2.session.BasicRuntime;
 import com.kagg886.seiko.dic.v2.util.calc.ComputeText;
-import com.kagg886.seiko.dic.v2.util.express.Ref;
-import com.kagg886.seiko.dic.v2.util.express.impl.FormatRef;
-import net.objecthunter.exp4j.ExpressionBuilder;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**

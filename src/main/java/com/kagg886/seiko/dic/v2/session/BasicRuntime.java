@@ -8,12 +8,11 @@ import com.kagg886.seiko.dic.v2.entity.code.func.Function;
 import com.kagg886.seiko.dic.v2.entity.code.impl.Expression;
 import com.kagg886.seiko.dic.v2.entity.code.impl.FastAssignment;
 import com.kagg886.seiko.dic.v2.entity.code.impl.PlainText;
+import com.kagg886.seiko.dic.v2.env.DictionaryEnvironment;
 import com.kagg886.seiko.dic.v2.exception.DictionaryOnRunningException;
+import com.kagg886.seiko.dic.v2.model.DictionarySetting;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * @projectName: Seiko
@@ -108,6 +107,12 @@ public abstract class BasicRuntime<Event, Contact, MessageCache> {
      */
     public void invoke(String command) {
         for (Map.Entry<DictionaryCommandMatcher, List<DictionaryCode>> entry : file.getCommands().entrySet()) {
+            DictionaryEnvironment env = DictionaryEnvironment.getInstance();
+            DictionarySetting setting = Optional.of(env.getDicConfig().getObject(file.getName(), DictionarySetting.class)).orElse(DictionarySetting.DEFAULT);
+            if (!setting.isEnabled()) {
+                return;
+            }
+
             DictionaryCommandMatcher matcher = entry.getKey();
             List<DictionaryCode> code = entry.getValue();
             if (!matcher.matchesDomain(this)) { //匹配指令触发的环境和当前环境是否相符

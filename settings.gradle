@@ -1,2 +1,3 @@
 rootProject.name = 'seiko_dic_core'
 
+gradle.ext.CoreVersion = '2.0-dev-1'

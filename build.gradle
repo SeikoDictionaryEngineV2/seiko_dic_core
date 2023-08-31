@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.kagg886.seiko.dic.v2'
-version = '2.0-dev'
+version = gradle.ext.CoreVersion
 
 repositories {
     mavenCentral()
@@ -26,7 +26,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'com.kagg886.seiko.dic.v2'
             artifactId = 'core-api'
-            version = '1.0'
+            version = gradle.ext.CoreVersion
             from components.java
         }
     }

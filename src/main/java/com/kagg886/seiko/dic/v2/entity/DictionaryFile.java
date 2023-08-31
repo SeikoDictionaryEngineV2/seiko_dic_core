@@ -235,6 +235,8 @@ public class DictionaryFile {
         return commands;
     }
 
+
+    //获取DicFile的名字，注意和DicProject的名字区分开
     public String getName() {
         return getFile().getName();
     }
