@@ -32,8 +32,8 @@ class DictionaryEnvironmentTest {
         environment.setDicData(base.resolve("data").toAbsolutePath());
         environment.setDicConfigPoint(base.resolve("config.json").toFile().getAbsolutePath());
 
-        environment.getGlobalFunctionRegister().put("测试", Log.class.getName());
-        environment.getGlobalFunctionRegister().put("抛出", Throw.class.getName());
+        environment.getGlobalFunctionRegister().put("测试", Log.class);
+        environment.getGlobalFunctionRegister().put("抛出", Throw.class);
 
 
         environment.getEventDomain().put("控制台", new Class[]{String.class});
