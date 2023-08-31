@@ -1,12 +1,16 @@
 package com.kagg886.seiko.dic.v2.env;
 
+import com.kagg886.seiko.dic.v2.entity.DictionaryProject;
 import com.kagg886.seiko.dic.v2.entity.code.DictionaryCommandMatcher;
 import com.kagg886.seiko.dic.v2.entity.code.func.Function;
+import com.kagg886.seiko.dic.v2.model.DictionarySetting;
 import com.kagg886.seiko.util.storage.JSONObjectStorage;
 
 import java.io.File;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @projectName: Seiko
@@ -22,7 +26,9 @@ public class DictionaryEnvironment {
     private String dicConfigPoint; //dicConfig存储路径
     private Path dicData; //dic生成的文件根路径
     private File dicRoot; //dic存储的根目录
-    private DictionaryEnvironment() {}
+
+    private DictionaryEnvironment() {
+    }
 
     public static DictionaryEnvironment getInstance() {
         return INSTANCE;
@@ -34,10 +40,11 @@ public class DictionaryEnvironment {
         dicConfig.save();
     }
 
-    public Map<String,Class<? extends Function>> getGlobalFunctionRegister() {
+    public Map<String, Class<? extends Function>> getGlobalFunctionRegister() {
         return Function.globalManager;
     }
-    public Map<String,Class<?>[]> getEventDomain() {
+
+    public Map<String, Class<?>[]> getEventDomain() {
         return DictionaryCommandMatcher.domainQuoteNew;
     }
 
@@ -51,6 +58,14 @@ public class DictionaryEnvironment {
 
     public JSONObjectStorage getDicConfig() {
         return JSONObjectStorage.obtain(dicConfigPoint);
+    }
+
+    public DictionarySetting getSetting(DictionaryProject project) {
+        if (!getDicList().contains(project)) {
+            throw new FileSystemNotFoundException(project.getName() + "未载入DictionaryEnvironment，可能由以下原因构成:\n1. 项目在载入时有语法错误\n2. 这个词库项目是使用构造参数初始化的而不是由DictionaryEnvironment加载");
+        }
+        return Optional.ofNullable(getDicConfig().getObject(project.getName(), DictionarySetting.class))
+                .orElse(DictionarySetting.DEFAULT);
     }
 
     public DICList getDicList() {

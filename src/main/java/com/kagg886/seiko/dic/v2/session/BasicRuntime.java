@@ -108,8 +108,7 @@ public abstract class BasicRuntime<Event, Contact, MessageCache> {
     public void invoke(String command) {
         for (Map.Entry<DictionaryCommandMatcher, List<DictionaryCode>> entry : file.getCommands().entrySet()) {
             DictionaryEnvironment env = DictionaryEnvironment.getInstance();
-            DictionarySetting setting = Optional.of(env.getDicConfig().getObject(file.getName(), DictionarySetting.class)).orElse(DictionarySetting.DEFAULT);
-            if (!setting.isEnabled()) {
+            if (!env.getSetting(file.getFather()).isEnabled()) {
                 return;
             }
 
