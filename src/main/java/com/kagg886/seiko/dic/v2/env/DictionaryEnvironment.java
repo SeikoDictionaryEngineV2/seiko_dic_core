@@ -65,7 +65,7 @@ public class DictionaryEnvironment {
             throw new FileSystemNotFoundException(project.getName() + "未载入DictionaryEnvironment，可能由以下原因构成:\n1. 项目在载入时有语法错误\n2. 这个词库项目是使用构造参数初始化的而不是由DictionaryEnvironment加载");
         }
         return Optional.ofNullable(getDicConfig().getObject(project.getName(), DictionarySetting.class))
-                .orElse(DictionarySetting.DEFAULT);
+                .orElse(DictionarySetting.getDefault());
     }
 
     public DICList getDicList() {

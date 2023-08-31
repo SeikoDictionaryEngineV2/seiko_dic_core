@@ -8,9 +8,11 @@ package com.kagg886.seiko.dic.v2.model;
  **/
 public class DictionarySetting {
 
-    public static final DictionarySetting DEFAULT = new DictionarySetting() {{
-        setEnabled(true);
-    }};
+    public static DictionarySetting getDefault() {
+        return new DictionarySetting() {{
+            setEnabled(true);
+        }};
+    }
 
     private boolean enabled;
 
