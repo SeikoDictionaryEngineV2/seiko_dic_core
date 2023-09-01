@@ -11,7 +11,6 @@ import com.kagg886.seiko.dic.v2.entity.code.impl.PlainText;
 import com.kagg886.seiko.dic.v2.entity.code.impl.WhileLoop;
 import com.kagg886.seiko.dic.v2.env.DictionaryEnvironment;
 import com.kagg886.seiko.dic.v2.exception.DictionaryOnRunningException;
-import com.kagg886.seiko.dic.v2.model.DictionarySetting;
 
 import java.util.*;
 
@@ -165,7 +164,7 @@ public abstract class BasicRuntime<Event, Contact, MessageCache> {
             }
 
             if (dic instanceof Expression.Continue) {
-                return;
+                throw new WhileLoop.NeedContinue();
             }
 
             if (dic instanceof Expression.Break) {

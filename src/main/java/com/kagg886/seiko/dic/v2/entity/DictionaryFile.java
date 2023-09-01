@@ -166,6 +166,7 @@ public class DictionaryFile {
 
             String prefix = TextUtils.repeat(" ", deep);
             if (comm.startsWith(prefix)) { //符合深度，开始填充
+                //TODO 有bug
                 comm = comm.replace(prefix, ""); //解空格
                 if (comm.startsWith("如果:")) {
                     ConditionalExpression expression = new ConditionalExpression(iterator.getLen(), comm);
@@ -176,7 +177,7 @@ public class DictionaryFile {
                         expression.setFailed(getAllElement(iterator, deep + 1));
                     }
                     dictionaryCodes.add(expression);
-                    if (iterator.getLen() < iterator.size()) {
+                    if (iterator.getLen() <= iterator.size()) {
                         iterator.setLen(iterator.getLen() - 1);
                     }
                 } else if (comm.startsWith("试错:")) {
@@ -200,7 +201,6 @@ public class DictionaryFile {
                     dictionaryCodes.add(loop);
                     iterator.setLen(iterator.getLen() - 1); //这一步是回滚进度，因为iterator方法最坏都会向后执行一步
                 } else if (comm.equals("跳出")) {
-                    //TODO 待测试
                     dictionaryCodes.add(new Expression.Break(iterator.getLen(), comm));
                 } else if (comm.equals("跳过")) {
                     dictionaryCodes.add(new Expression.Continue(iterator.getLen(),comm));

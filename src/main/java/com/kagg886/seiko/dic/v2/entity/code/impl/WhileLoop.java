@@ -18,6 +18,8 @@ public class WhileLoop extends Expression.If {
         while (super.calc(runtime)) {
             try {
                 runtime.invoke(loop,false);
+            } catch (NeedContinue e) {
+                continue;
             } catch (NeedBreak e) {
                 break;
             }
@@ -35,6 +37,10 @@ public class WhileLoop extends Expression.If {
 
     public void setLoop(List<DictionaryCode> loop) {
         this.loop = loop;
+    }
+
+    public static class NeedContinue extends RuntimeException {
+
     }
 
     public static class NeedBreak extends RuntimeException {

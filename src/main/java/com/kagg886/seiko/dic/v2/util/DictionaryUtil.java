@@ -115,7 +115,7 @@ public class DictionaryUtil {
         }
         if (str.contains("<")) {
             int idx = str.indexOf("<");
-            return varCalc.apply(str.substring(0, idx)) >= varCalc.apply(str.substring(idx + 1));
+            return varCalc.apply(str.substring(0, idx)) < varCalc.apply(str.substring(idx + 1));
 
         }
         throw new DictionaryOnRunningException("计算表达式出错!" + str);
