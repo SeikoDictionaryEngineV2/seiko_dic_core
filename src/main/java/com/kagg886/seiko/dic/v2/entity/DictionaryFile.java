@@ -40,7 +40,7 @@ public class DictionaryFile {
 
     public static final String DIC_PREFIX = "#Seiko词库V2";
 
-    public DictionaryFile(DictionaryProject project,File dicFile) {
+    public DictionaryFile(DictionaryProject project, File dicFile) {
         this.father = project;
         this.dicFile = dicFile;
         if (!dicFile.exists() || dicFile.isDirectory()) {
@@ -199,6 +199,11 @@ public class DictionaryFile {
                     loop.setLoop(getAllElement(iterator, deep + 1));
                     dictionaryCodes.add(loop);
                     iterator.setLen(iterator.getLen() - 1); //这一步是回滚进度，因为iterator方法最坏都会向后执行一步
+                } else if (comm.equals("跳出")) {
+                    //TODO 待测试
+                    dictionaryCodes.add(new Expression.Break(iterator.getLen(), comm));
+                } else if (comm.equals("跳过")) {
+                    dictionaryCodes.add(new Expression.Continue(iterator.getLen(),comm));
                 } else {
                     if (TextUtils.isEmpty(comm)) {
                         return dictionaryCodes;
@@ -206,7 +211,7 @@ public class DictionaryFile {
                     //解析其他地方的表达式
                     if (comm.startsWith("$") && comm.endsWith("$")) { //真的会有人最后一行跟换行符(
                         try {
-                            Function func = Function.parse(comm, iterator.getLen(),father);
+                            Function func = Function.parse(comm, iterator.getLen(), father);
                             if (func instanceof Function.Deprecated) {
                                 throw new DictionaryOnRunningException("发现过时函数:" + func.getCode() + "\n" + ((Function.Deprecated) func).getAdvice());
                             }

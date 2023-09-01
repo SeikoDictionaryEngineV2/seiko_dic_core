@@ -8,6 +8,7 @@ import com.kagg886.seiko.dic.v2.entity.code.func.Function;
 import com.kagg886.seiko.dic.v2.entity.code.impl.Expression;
 import com.kagg886.seiko.dic.v2.entity.code.impl.FastAssignment;
 import com.kagg886.seiko.dic.v2.entity.code.impl.PlainText;
+import com.kagg886.seiko.dic.v2.entity.code.impl.WhileLoop;
 import com.kagg886.seiko.dic.v2.env.DictionaryEnvironment;
 import com.kagg886.seiko.dic.v2.exception.DictionaryOnRunningException;
 import com.kagg886.seiko.dic.v2.model.DictionarySetting;
@@ -161,6 +162,14 @@ public abstract class BasicRuntime<Event, Contact, MessageCache> {
                 for (int i = popStart; i < popEnd; i++) {
                     exceptionStacks.pop(); //方法成功执行时会移除调用栈
                 }
+            }
+
+            if (dic instanceof Expression.Continue) {
+                return;
+            }
+
+            if (dic instanceof Expression.Break) {
+                throw new WhileLoop.NeedBreak();
             }
 
             if (dic instanceof PlainText) {

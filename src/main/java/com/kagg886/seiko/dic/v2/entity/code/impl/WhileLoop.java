@@ -16,7 +16,11 @@ public class WhileLoop extends Expression.If {
     @Override
     public <T> boolean calc(BasicRuntime<T,?,?> runtime) {
         while (super.calc(runtime)) {
-            runtime.invoke(loop,false);
+            try {
+                runtime.invoke(loop,false);
+            } catch (NeedBreak e) {
+                break;
+            }
         }
         return true;
     }
@@ -31,5 +35,9 @@ public class WhileLoop extends Expression.If {
 
     public void setLoop(List<DictionaryCode> loop) {
         this.loop = loop;
+    }
+
+    public static class NeedBreak extends RuntimeException {
+
     }
 }

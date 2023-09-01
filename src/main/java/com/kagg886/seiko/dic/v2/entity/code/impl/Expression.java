@@ -33,4 +33,16 @@ public abstract class Expression extends DictionaryCode {
             return DictionaryUtil.evalBooleanExpression(express,runtime.getRuntimeObject());
         }
     }
+
+    public static class Continue extends Expression {
+        public Continue(int line, String code) {
+            super(line, code);
+        }
+    }
+
+    public static class Break extends Expression {
+        public Break(int line, String code) {
+            super(line, code);
+        }
+    }
 }
