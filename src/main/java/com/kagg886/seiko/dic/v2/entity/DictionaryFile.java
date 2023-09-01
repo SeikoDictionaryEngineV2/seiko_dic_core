@@ -166,45 +166,47 @@ public class DictionaryFile {
 
             String prefix = TextUtils.repeat(" ", deep);
             if (comm.startsWith(prefix)) { //符合深度，开始填充
-                //TODO 有bug
                 comm = comm.replace(prefix, ""); //解空格
+
                 if (comm.startsWith("如果:")) {
+                    System.out.println(iterator.getLen() + ":" + comm);
+//                    getAllElement(iterator, deep + 1);
                     ConditionalExpression expression = new ConditionalExpression(iterator.getLen(), comm);
                     expression.setSuccess(getAllElement(iterator, deep + 1));
-                    iterator.setLen(iterator.getLen() - 1); //这一步是回滚进度，因为iterator方法最坏都会向后执行一步
-                    comm = iterator.next(); //提前获取下一步指令是如果尾还是闭合标志
+                    comm = iterator.previewNext(); //提前获取下一步指令是如果尾还是闭合标志
                     if (comm.startsWith(prefix + "如果尾")) {
+                        iterator.next();
                         expression.setFailed(getAllElement(iterator, deep + 1));
                     }
                     dictionaryCodes.add(expression);
-                    if (iterator.getLen() <= iterator.size()) {
-                        iterator.setLen(iterator.getLen() - 1);
-                    }
                 } else if (comm.startsWith("试错:")) {
+                    System.out.println(iterator.getLen() + ":" + comm);
+//                    getAllElement(iterator, deep + 1);
                     TryBlock tryBlock = new TryBlock(iterator.getLen(), comm);
                     tryBlock.setSuccess(getAllElement(iterator, deep + 1));
-                    iterator.setLen(iterator.getLen() - 1); //这一步是回滚进度，因为iterator方法最坏都会向后执行一步
-                    comm = iterator.next(); //提前获取下一步指令是如果尾还是闭合标志
+                    comm = iterator.previewNext(); //提前获取下一步指令是如果尾还是闭合标志
                     if (comm.startsWith(prefix + "捕获")) {
+                        iterator.next();
                         if (comm.replace(prefix + "捕获:", "").length() != 0) {
                             tryBlock.setExceptionVarName(comm.replace(prefix + "捕获:", ""));
                         }
                         tryBlock.setFailed(getAllElement(iterator, deep + 1));
                     }
                     dictionaryCodes.add(tryBlock);
-                    if (iterator.getLen() < iterator.size()) {
-                        iterator.setLen(iterator.getLen() - 1);
-                    }
                 } else if (comm.startsWith("循环:")) {
+                    System.out.println(iterator.getLen() + ":" + comm);
+//                    getAllElement(iterator, deep + 1);
                     WhileLoop loop = new WhileLoop(iterator.getLen(), comm);
                     loop.setLoop(getAllElement(iterator, deep + 1));
                     dictionaryCodes.add(loop);
-                    iterator.setLen(iterator.getLen() - 1); //这一步是回滚进度，因为iterator方法最坏都会向后执行一步
                 } else if (comm.equals("跳出")) {
+                    System.out.println(iterator.getLen() + ":" + comm);
                     dictionaryCodes.add(new Expression.Break(iterator.getLen(), comm));
                 } else if (comm.equals("跳过")) {
-                    dictionaryCodes.add(new Expression.Continue(iterator.getLen(),comm));
+                    System.out.println(iterator.getLen() + ":" + comm);
+                    dictionaryCodes.add(new Expression.Continue(iterator.getLen(), comm));
                 } else {
+                    System.out.println(iterator.getLen() + ":" + comm);
                     if (TextUtils.isEmpty(comm)) {
                         return dictionaryCodes;
                     }
@@ -226,6 +228,7 @@ public class DictionaryFile {
                     }
                 }
             } else {
+                iterator.setLen(iterator.getLen() - 1);
                 return dictionaryCodes;
             }
         }

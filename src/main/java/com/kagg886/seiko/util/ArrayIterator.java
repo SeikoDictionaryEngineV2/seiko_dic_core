@@ -29,6 +29,9 @@ public class ArrayIterator<T> implements Iterator<T> {
         return len < array.length;
     }
 
+    public T previewNext() {
+        return array[len+1];
+    }
     @Override
     public T next() {
         return array[len++];

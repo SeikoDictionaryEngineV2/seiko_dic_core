@@ -55,7 +55,7 @@ class DictionaryEnvironmentTest {
             LogRuntime runtime = new LogRuntime(dic, "");
 
             //传入指令，进行词库的运行
-            runtime.invoke("qwq");
+            runtime.invoke("qwq1");
         }
     }
 

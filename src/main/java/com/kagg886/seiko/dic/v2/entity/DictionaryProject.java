@@ -22,7 +22,7 @@ public class DictionaryProject {
     private DictionaryFile indexFile;
 
     //是否是单文件词库
-    private boolean isSimpleDictionary = false;
+    private final boolean isSimpleDictionary;
 
     //词库的子词库列表
     private final List<DictionaryFile> subFile = new ArrayList<>();
@@ -40,9 +40,11 @@ public class DictionaryProject {
     //解析上下文方法
     //TODO need implemented
     private void initContextFunctions() {
-        File f = rootFile.toPath().resolve("func").toFile();
-        for (File jarOrDex : Objects.requireNonNull(f.listFiles())) {
-            System.out.println("decode:" + jarOrDex.getName());
+        if (!isSimpleDictionary) {
+            File f = rootFile.toPath().resolve("func").toFile();
+            for (File jarOrDex : Objects.requireNonNull(f.listFiles())) {
+                System.out.println("decode:" + jarOrDex.getName());
+            }
         }
     }
 
