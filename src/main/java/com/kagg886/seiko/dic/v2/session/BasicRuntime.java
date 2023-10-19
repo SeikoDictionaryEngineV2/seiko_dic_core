@@ -5,6 +5,7 @@ import com.kagg886.seiko.dic.v2.entity.code.DictionaryCode;
 import com.kagg886.seiko.dic.v2.entity.code.DictionaryCommandMatcher;
 import com.kagg886.seiko.dic.v2.entity.DictionaryFile;
 import com.kagg886.seiko.dic.v2.entity.code.func.Function;
+import com.kagg886.seiko.dic.v2.entity.code.func.type.SendMessageWhenPostExecute;
 import com.kagg886.seiko.dic.v2.entity.code.impl.Expression;
 import com.kagg886.seiko.dic.v2.entity.code.impl.FastAssignment;
 import com.kagg886.seiko.dic.v2.entity.code.impl.PlainText;
@@ -146,7 +147,7 @@ public abstract class BasicRuntime<Event, Contact, MessageCache> {
         for (DictionaryCode dic : code) {
             exceptionStacks.push(dic.toString());
             if (dic instanceof Function) {
-                if (dic instanceof Function.InterruptedFunction) {
+                if (dic instanceof SendMessageWhenPostExecute) {
                     if (!sendSwitch) {
                         clearMessage();
                         sendSwitch = true;

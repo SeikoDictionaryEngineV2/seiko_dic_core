@@ -3,6 +3,7 @@ package com.kagg886.seiko.dic.v2.entity;
 import com.kagg886.seiko.dic.v2.entity.code.DictionaryCode;
 import com.kagg886.seiko.dic.v2.entity.code.DictionaryCommandMatcher;
 import com.kagg886.seiko.dic.v2.entity.code.func.Function;
+import com.kagg886.seiko.dic.v2.entity.code.func.type.DeprecatedFunction;
 import com.kagg886.seiko.dic.v2.entity.code.impl.*;
 import com.kagg886.seiko.dic.v2.exception.DictionaryOnLoadException;
 import com.kagg886.seiko.dic.v2.exception.DictionaryOnRunningException;
@@ -64,7 +65,7 @@ public class DictionaryFile {
         clear();
 
         String dicCodes = IOUtil.loadStringFromFile(dicFile.getAbsolutePath()).replace("\r", "");
-        if (dicCodes.length() == 0) {
+        if (dicCodes.isEmpty()) {
             throw new DictionaryOnLoadException("[" + dicFile.getName() + "]为空!");
         }
         String[] lines = dicCodes.split("\n");
@@ -134,7 +135,7 @@ public class DictionaryFile {
                 continue;
             }
             if (TextUtils.isEmpty(comm)) {
-                if (dictionaryCodes.size() == 0) {
+                if (dictionaryCodes.isEmpty()) {
                     //排除只有指令没有伪代码实现的情况
                     throw new DictionaryOnLoadException("指令无伪代码实现:" + commandRegex + "(" + dicFile.getName() + ":" + (iterator.getLen() - 1) + ")");
                 }
@@ -187,7 +188,7 @@ public class DictionaryFile {
                     comm = iterator.previewNext(); //提前获取下一步指令是如果尾还是闭合标志
                     if (comm.startsWith(prefix + "捕获")) {
                         iterator.next();
-                        if (comm.replace(prefix + "捕获:", "").length() != 0) {
+                        if (!comm.replace(prefix + "捕获:", "").isEmpty()) {
                             tryBlock.setExceptionVarName(comm.replace(prefix + "捕获:", ""));
                         }
                         tryBlock.setFailed(getAllElement(iterator, deep + 1));
@@ -214,8 +215,8 @@ public class DictionaryFile {
                     if (comm.startsWith("$") && comm.endsWith("$")) { //真的会有人最后一行跟换行符(
                         try {
                             Function func = Function.parse(comm, iterator.getLen(), father);
-                            if (func instanceof Function.Deprecated) {
-                                throw new DictionaryOnRunningException("发现过时函数:" + func.getCode() + "\n" + ((Function.Deprecated) func).getAdvice());
+                            if (func instanceof DeprecatedFunction) {
+                                throw new DictionaryOnRunningException("发现过时函数:" + func.getCode() + "\n" + ((DeprecatedFunction) func).getAdvice());
                             }
                             dictionaryCodes.add(func);
                         } catch (Throwable e) {

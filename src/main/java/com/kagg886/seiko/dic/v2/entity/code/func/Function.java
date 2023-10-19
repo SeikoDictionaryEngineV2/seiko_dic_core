@@ -2,6 +2,7 @@ package com.kagg886.seiko.dic.v2.entity.code.func;
 
 import com.kagg886.seiko.dic.v2.entity.DictionaryProject;
 import com.kagg886.seiko.dic.v2.entity.code.DictionaryCode;
+import com.kagg886.seiko.dic.v2.entity.code.func.type.ArgumentLimiter;
 import com.kagg886.seiko.dic.v2.session.BasicRuntime;
 import com.kagg886.seiko.dic.v2.util.calc.ComputeText;
 
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
  * @package: com.kagg886.seiko.dic.entity.impl
  * @className: Function
  * @author: kagg886
- * @description: 代表一个函数，最好不要直接继承它。
+ * @description: 代表一个函数
  * @date: 2023/1/16 17:25
  * @version: 1.0
  */
@@ -32,7 +33,7 @@ public abstract class Function extends DictionaryCode {
         argCode = code.substring(sIndex + 1, code.length() - 1);
     }
 
-    public HashMap<String, Class<? extends Function>> getGlobalManager() {
+    public static HashMap<String, Class<? extends Function>> getGlobalManager() {
         return globalManager;
     }
 
@@ -84,62 +85,4 @@ public abstract class Function extends DictionaryCode {
     }
 
     protected abstract Object run(BasicRuntime<?, ?, ?> runtime, List<Object> args);
-
-    /**
-     * @projectName: Seiko
-     * @package: com.kagg886.seiko.dic.entity.impl
-     * @className: InterruptedFunction
-     * @author: kagg886
-     * @description: 代表一个缓冲区阻断函数。在调用此函数前，需要清空并发送缓冲区内内容。
-     * @date: 2023/1/18 11:43
-     * @version: 1.0
-     */
-    public static abstract class InterruptedFunction extends Function {
-
-        public InterruptedFunction(int line, String code) {
-            super(line, code);
-        }
-    }
-
-    /**
-     * @projectName: Seiko
-     * @package: com.kagg886.seiko.dic.entity.impl
-     * @className: InterruptedFunction
-     * @author: kagg886
-     * @description: 代表一个缓冲区非阻断函数。在调用此函数前，不需要清空并发送缓冲区内内容。
-     * @date: 2023/1/18 11:45
-     * @version: 1.0
-     */
-    public static abstract class UnInterruptedFunction extends Function {
-
-        public UnInterruptedFunction(int line, String code) {
-            super(line, code);
-        }
-    }
-
-    /**
-     * @projectName: Seiko
-     * @package: com.kagg886.seiko.dic.entity.impl
-     * @className: ArgumentLimiter
-     * @author: kagg886
-     * @description: 限制了参数的Function，最多只能拥有getArgumentLength()个参数
-     * @date: 2023/3/28 12:42
-     * @version: 1.0
-     */
-    public interface ArgumentLimiter {
-        int getArgumentLength();
-    }
-
-    /**
-     * @projectName: Seiko
-     * @package: com.kagg886.seiko.dic.entity.impl
-     * @className: Deprecated
-     * @author: kagg886
-     * @description: 实现此接口的方法将不再维护。此外，伪代码被加载时若使用了这些方法则会输出警告提示。
-     * @date: 2023/3/30 13:08
-     * @version: 1.0
-     */
-    public interface Deprecated {
-        String getAdvice();
-    }
 }

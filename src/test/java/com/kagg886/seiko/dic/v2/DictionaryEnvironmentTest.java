@@ -60,7 +60,7 @@ class DictionaryEnvironmentTest {
     }
 
 
-    public static class Log extends Function.UnInterruptedFunction {
+    public static class Log extends Function {
 
         public Log(int line, String code) {
             super(line, code);
@@ -68,12 +68,12 @@ class DictionaryEnvironmentTest {
 
         //返回值会被写入到缓冲区中，如不想写入可返回null。
         @Override
-        protected Object run(BasicRuntime<?, ?, ?> runtime, List<Object> args) {
+        public Object run(BasicRuntime<?, ?, ?> runtime, List<Object> args) {
             return "测试成功";
         }
     }
 
-    public static class Throw extends Function.UnInterruptedFunction {
+    public static class Throw extends Function {
 
         public Throw(int line, String code) {
             super(line, code);
@@ -81,7 +81,7 @@ class DictionaryEnvironmentTest {
 
         //若在方法执行过程中抛错且未被捕获，Seiko词库引擎会给出详细的报错信息
         @Override
-        protected Object run(BasicRuntime<?, ?, ?> runtime, List<Object> args) {
+        public Object run(BasicRuntime<?, ?, ?> runtime, List<Object> args) {
             throw new RuntimeException();
         }
     }
