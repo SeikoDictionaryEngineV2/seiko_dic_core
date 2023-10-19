@@ -174,9 +174,9 @@ public class DictionaryFile {
 //                    getAllElement(iterator, deep + 1);
                     ConditionalExpression expression = new ConditionalExpression(iterator.getLen(), comm);
                     expression.setSuccess(getAllElement(iterator, deep + 1));
-                    comm = iterator.now(); //提前获取下一步指令是如果尾还是闭合标志
+                    comm = iterator.now();
                     if (comm.startsWith(prefix + "如果尾")) {
-                        iterator.next();
+                        iterator.next(); //如果尾需要排除
                         expression.setFailed(getAllElement(iterator, deep + 1));
                     }
                     dictionaryCodes.add(expression);
@@ -185,12 +185,13 @@ public class DictionaryFile {
 //                    getAllElement(iterator, deep + 1);
                     TryBlock tryBlock = new TryBlock(iterator.getLen(), comm);
                     tryBlock.setSuccess(getAllElement(iterator, deep + 1));
-                    comm = iterator.now(); //提前获取下一步指令是如果尾还是闭合标志
+                    comm = iterator.now();
                     if (comm.startsWith(prefix + "捕获")) {
-                        iterator.next();
-                        if (!comm.replace(prefix + "捕获:", "").isEmpty()) {
-                            tryBlock.setExceptionVarName(comm.replace(prefix + "捕获:", ""));
+//                        iterator.next(); //捕获需要扔掉
+                        if (!comm.replace(prefix + "捕获", "").replace(":","").isEmpty()) {
+                            tryBlock.setExceptionVarName(iterator.previewNext().replace(prefix + "捕获:", ""));
                         }
+                        iterator.next();
                         tryBlock.setFailed(getAllElement(iterator, deep + 1));
                     }
                     dictionaryCodes.add(tryBlock);
