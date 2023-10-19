@@ -34,7 +34,7 @@ public class ComputeText implements Ref {
             type = Type.STRING;
         }
         try {
-            JSON.parseObject(source);
+            JSON.parse(source);
             type = Type.JSON;
             return;
         } catch (Exception ignored) {}
@@ -120,7 +120,7 @@ public class ComputeText implements Ref {
             String result;
             try {
                 result = new BigDecimal(Double.toString(new ExpressionBuilder(cw).build().evaluate())).toPlainString();
-            } catch (NumberFormatException e) {
+            } catch (IllegalArgumentException e) {
                 result = "NaN";
             }
             if (result.endsWith(".0")) { //小数整数化

@@ -76,8 +76,12 @@ public class DictionaryUtil {
         }
 
         Function<String,Double> varCalc = (deal) -> {
-            ComputeText text = new ComputeText("[" + deal + "]");
-            return Double.parseDouble(text.get(runtime).toString());
+            try {
+                return Double.parseDouble(deal);
+            } catch (NumberFormatException e) {
+                ComputeText text = new ComputeText("[" + deal + "]");
+                return Double.parseDouble(text.get(runtime).toString());
+            }
         };
 
         if (str.contains("==")) {
