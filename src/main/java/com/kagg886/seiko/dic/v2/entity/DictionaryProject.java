@@ -43,7 +43,7 @@ public class DictionaryProject {
         if (!isSimpleDictionary) {
             File f = rootFile.toPath().resolve("func").toFile();
             for (File jarOrDex : Objects.requireNonNull(f.listFiles())) {
-                System.out.println("decode:" + jarOrDex.getName());
+//                System.out.println("decode:" + jarOrDex.getName());
             }
         }
     }

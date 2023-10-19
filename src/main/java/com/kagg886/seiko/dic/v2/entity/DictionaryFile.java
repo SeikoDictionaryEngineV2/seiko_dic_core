@@ -170,22 +170,22 @@ public class DictionaryFile {
                 comm = comm.replace(prefix, ""); //解空格
 
                 if (comm.startsWith("如果:")) {
-                    System.out.println(iterator.getLen() + ":" + comm);
+//                    System.out.println(iterator.getLen() + ":" + comm);
 //                    getAllElement(iterator, deep + 1);
                     ConditionalExpression expression = new ConditionalExpression(iterator.getLen(), comm);
                     expression.setSuccess(getAllElement(iterator, deep + 1));
-                    comm = iterator.previewNext(); //提前获取下一步指令是如果尾还是闭合标志
+                    comm = iterator.now(); //提前获取下一步指令是如果尾还是闭合标志
                     if (comm.startsWith(prefix + "如果尾")) {
                         iterator.next();
                         expression.setFailed(getAllElement(iterator, deep + 1));
                     }
                     dictionaryCodes.add(expression);
                 } else if (comm.startsWith("试错:")) {
-                    System.out.println(iterator.getLen() + ":" + comm);
+//                    System.out.println(iterator.getLen() + ":" + comm);
 //                    getAllElement(iterator, deep + 1);
                     TryBlock tryBlock = new TryBlock(iterator.getLen(), comm);
                     tryBlock.setSuccess(getAllElement(iterator, deep + 1));
-                    comm = iterator.previewNext(); //提前获取下一步指令是如果尾还是闭合标志
+                    comm = iterator.now(); //提前获取下一步指令是如果尾还是闭合标志
                     if (comm.startsWith(prefix + "捕获")) {
                         iterator.next();
                         if (!comm.replace(prefix + "捕获:", "").isEmpty()) {
@@ -195,19 +195,19 @@ public class DictionaryFile {
                     }
                     dictionaryCodes.add(tryBlock);
                 } else if (comm.startsWith("循环:")) {
-                    System.out.println(iterator.getLen() + ":" + comm);
+//                    System.out.println(iterator.getLen() + ":" + comm);
 //                    getAllElement(iterator, deep + 1);
                     WhileLoop loop = new WhileLoop(iterator.getLen(), comm);
                     loop.setLoop(getAllElement(iterator, deep + 1));
                     dictionaryCodes.add(loop);
                 } else if (comm.equals("跳出")) {
-                    System.out.println(iterator.getLen() + ":" + comm);
+//                    System.out.println(iterator.getLen() + ":" + comm);
                     dictionaryCodes.add(new Expression.Break(iterator.getLen(), comm));
                 } else if (comm.equals("跳过")) {
-                    System.out.println(iterator.getLen() + ":" + comm);
+//                    System.out.println(iterator.getLen() + ":" + comm);
                     dictionaryCodes.add(new Expression.Continue(iterator.getLen(), comm));
                 } else {
-                    System.out.println(iterator.getLen() + ":" + comm);
+//                    System.out.println(iterator.getLen() + ":" + comm);
                     if (TextUtils.isEmpty(comm)) {
                         return dictionaryCodes;
                     }

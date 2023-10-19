@@ -48,4 +48,8 @@ public class ArrayIterator<T> implements Iterator<T> {
     public T before() {
         return array[len - 1];
     }
+
+    public T now() {
+        return array[len];
+    }
 }
