@@ -39,7 +39,7 @@ public class FastAssignment extends DictionaryCode {
         String valueRef = text.getSource();
         if (valueRef.startsWith("$") && valueRef.endsWith("$")) { //方法返回值注入模式
             try {
-                Function method = Function.parse(valueRef, getLine(), runtime.getProject());
+                Function method = Function.parse(valueRef, getLine(), runtime.getFile().getFather());
                 Object rtn = method.invoke(runtime);
                 if (rtn == null) {
                     throw new DictionaryOnRunningException(String.format("无法取得方法值:%s，因为方法值为空", method.getCode()));

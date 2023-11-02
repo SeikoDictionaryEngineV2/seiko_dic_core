@@ -20,20 +20,7 @@ class DictionaryEnvironmentTest {
 
     @Test
     void getInstance() {
-        DictionaryEnvironment environment = DictionaryEnvironment.getInstance();
-
-        Path base = new File("mock").toPath();
-        if (base.toFile().isDirectory()) {
-            base.toFile().mkdirs();
-        }
-
-        //设置mock\dic为伪代码文件的路径。伪代码的扫码等均在此进行。
-        environment.setDicRoot(base.resolve("dic").toFile());
-        //设置mock\data为伪代码文件产生的文件默认仓储的路径。
-        environment.setDicData(base.resolve("data").toAbsolutePath());
-
-        //设置dic的启停配置文件。此文件用于管理词库工程启用停止状态
-        environment.setDicConfigPoint(base.resolve("config.json").toFile().getAbsolutePath());
+        DictionaryEnvironment environment = initEnv();
 
         //注册词库方法,K为方法的根标签，V为对应方法的class对象
         environment.getGlobalFunctionRegister().put("测试", Log.class);
@@ -52,11 +39,29 @@ class DictionaryEnvironmentTest {
         for (DictionaryProject dic : environment.getDicList()) {
 
             //构造词库Runtime。这个Runtime应该是用完即丢弃的
-            LogRuntime runtime = new LogRuntime(dic, "");
+            LogRuntime runtime = new LogRuntime(dic.getIndexFile(), "");
 
             //传入指令，进行词库的运行
             runtime.invoke("qwq");
         }
+    }
+
+    private static DictionaryEnvironment initEnv() {
+        DictionaryEnvironment environment = DictionaryEnvironment.getInstance();
+
+        Path base = new File("mock").toPath();
+        if (base.toFile().isDirectory()) {
+            base.toFile().mkdirs();
+        }
+
+        //设置mock\dic为伪代码文件的路径。伪代码的扫码等均在此进行。
+        environment.setDicRoot(base.resolve("dic").toFile());
+        //设置mock\data为伪代码文件产生的文件默认仓储的路径。
+        environment.setDicData(base.resolve("data").toAbsolutePath());
+
+        //设置dic的启停配置文件。此文件用于管理词库工程启用停止状态
+        environment.setDicConfigPoint(base.resolve("config.json").toFile().getAbsolutePath());
+        return environment;
     }
 
 
@@ -89,7 +94,7 @@ class DictionaryEnvironmentTest {
     //继承BasicRuntime，三个泛型分别为：事件class，联系人class，消息缓冲区class
     public static class LogRuntime extends BasicRuntime<String, String, StringBuilder> {
 
-        public LogRuntime(DictionaryProject file, String s) {
+        public LogRuntime(DictionaryFile file, String s) {
             super(file, s);
         }
 

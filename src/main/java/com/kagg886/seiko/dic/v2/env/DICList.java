@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  */
 public class DICList extends ArrayList<DictionaryProject> {
 
-    public static final DICList INSTANCE = new DICList();;
+    public static final DICList INSTANCE = new DICList();
 
 
     private DICList() {

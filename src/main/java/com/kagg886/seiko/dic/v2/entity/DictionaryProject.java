@@ -1,6 +1,8 @@
 package com.kagg886.seiko.dic.v2.entity;
 
 import com.kagg886.seiko.dic.v2.entity.code.func.Function;
+import com.kagg886.seiko.dic.v2.env.DictionaryEnvironment;
+import com.kagg886.seiko.dic.v2.util.loader.ContextFunctionLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,13 +39,17 @@ public class DictionaryProject {
         initContextFunctions();
     }
 
-    //解析上下文方法
-    //TODO need implemented
     private void initContextFunctions() {
         if (!isSimpleDictionary) {
             File f = rootFile.toPath().resolve("func").toFile();
+
+            ContextFunctionLoader loader = DictionaryEnvironment.getInstance().getContextFunctionLoader();
+            if (loader instanceof ContextFunctionLoader.NotSupported) {
+                return;
+            }
+
             for (File jarOrDex : Objects.requireNonNull(f.listFiles())) {
-//                System.out.println("decode:" + jarOrDex.getName());
+                imports.putAll(loader.loadClass(jarOrDex));
             }
         }
     }

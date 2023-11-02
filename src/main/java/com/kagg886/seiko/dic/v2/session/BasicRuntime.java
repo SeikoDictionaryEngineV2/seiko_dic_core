@@ -27,8 +27,6 @@ import java.util.*;
 public abstract class BasicRuntime<Event, Contact, MessageCache> {
     private final Event event; //此次执行伪代码所需要的事件
     private Contact contact; //联系人对象，暴露出来是为了往其他群主动发消息用
-
-    private final DictionaryProject project; //被执行的词库项目
     private final DictionaryFile file; //被执行的伪代码指令集
     private final HashMap<String, Object> context; //此次伪代码执行过程中存取的变量
     private final Stack<String> exceptionStacks; //词库调用栈，每次*执行完一条命令*就会存储一条信息到栈中。
@@ -41,9 +39,8 @@ public abstract class BasicRuntime<Event, Contact, MessageCache> {
      * @description 构造函数
      * @date 2023/01/19 19:53
      */
-    public BasicRuntime(DictionaryProject project, Event event) {
-        this.project = project;
-        this.file = project.getIndexFile();
+    public BasicRuntime(DictionaryFile file, Event event) {
+        this.file = file;
         this.event = event;
         context = new HashMap<>();
         exceptionStacks = new Stack<>();
@@ -73,10 +70,6 @@ public abstract class BasicRuntime<Event, Contact, MessageCache> {
 
     public DictionaryFile getFile() {
         return file;
-    }
-
-    public DictionaryProject getProject() {
-        return project;
     }
 
     public Contact getContact() {

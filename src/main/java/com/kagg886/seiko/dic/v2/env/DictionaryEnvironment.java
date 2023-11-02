@@ -4,6 +4,7 @@ import com.kagg886.seiko.dic.v2.entity.DictionaryProject;
 import com.kagg886.seiko.dic.v2.entity.code.DictionaryCommandMatcher;
 import com.kagg886.seiko.dic.v2.entity.code.func.Function;
 import com.kagg886.seiko.dic.v2.model.DictionarySetting;
+import com.kagg886.seiko.dic.v2.util.loader.ContextFunctionLoader;
 import com.kagg886.seiko.util.storage.JSONObjectStorage;
 
 import java.io.File;
@@ -27,6 +28,8 @@ public class DictionaryEnvironment {
     private Path dicData; //dic生成的文件根路径
     private File dicRoot; //dic存储的根目录
 
+    private ContextFunctionLoader contextFunctionLoader = new ContextFunctionLoader.NotSupported(); //上下文方法加载器，根据不同平台实现。若无此加载器则无法解析上下文方法
+
     private DictionaryEnvironment() {
     }
 
@@ -38,6 +41,14 @@ public class DictionaryEnvironment {
         final JSONObjectStorage dicConfig = getDicConfig();
         dicConfig.put(dicName, newConfig);
         dicConfig.save();
+    }
+
+    public ContextFunctionLoader getContextFunctionLoader() {
+        return contextFunctionLoader;
+    }
+
+    public void setContextFunctionLoader(ContextFunctionLoader contextFunctionLoader) {
+        this.contextFunctionLoader = contextFunctionLoader;
     }
 
     public Map<String, Class<? extends Function>> getGlobalFunctionRegister() {
