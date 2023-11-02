@@ -1,15 +1,16 @@
 plugins {
     id 'java'
-    id 'maven-publish'
+
+    id "com.vanniktech.maven.publish" version "0.25.3"
 }
 
-group = 'com.kagg886.seiko.dic.v2'
+group = 'io.github.seikodictionaryenginev2'
+archivesBaseName = rootProject.name
 version = gradle.ext.CoreVersion
 
 repositories {
     mavenCentral()
 }
-
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
@@ -19,17 +20,6 @@ dependencies {
     implementation 'net.objecthunter:exp4j:0.4.8'
 
     implementation 'org.jsoup:jsoup:1.15.3'
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId = 'com.kagg886.seiko.dic.v2'
-            artifactId = 'core-api'
-            version = gradle.ext.CoreVersion
-            from components.java
-        }
-    }
 }
 
 test {
