@@ -167,7 +167,7 @@ public class DictionaryFile {
 
             String prefix = TextUtils.repeat(" ", deep);
             if (comm.startsWith(prefix)) { //符合深度，开始填充
-                comm = comm.replace(prefix, ""); //解空格
+                comm = comm.replaceFirst(prefix, ""); //解空格,使用first防止多余的空格被替换
 
                 if (comm.startsWith("如果:")) {
 //                    System.out.println(iterator.getLen() + ":" + comm);

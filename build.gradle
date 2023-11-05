@@ -4,9 +4,9 @@ plugins {
     id "com.vanniktech.maven.publish" version "0.25.3"
 }
 
-group = 'io.github.seikodictionaryenginev2'
+group = GROUP
 archivesBaseName = rootProject.name
-version = gradle.ext.CoreVersion
+version = VERSION_NAME
 
 repositories {
     mavenCentral()
