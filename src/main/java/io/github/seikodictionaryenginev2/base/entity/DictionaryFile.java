@@ -188,7 +188,7 @@ public class DictionaryFile {
                     comm = iterator.now();
                     if (comm.startsWith(prefix + "捕获")) {
 //                        iterator.next(); //捕获需要扔掉
-                        if (!comm.replace(prefix + "捕获", "").replace(":","").isEmpty()) {
+                        if (!comm.replace(prefix + "捕获", "").replace(":", "").isEmpty()) {
                             tryBlock.setExceptionVarName(iterator.previewNext().replace(prefix + "捕获:", ""));
                         }
                         iterator.next();
@@ -225,6 +225,8 @@ public class DictionaryFile {
                         }
                     } else if (comm.contains("<-") && !comm.contains("\\<-")) {
                         dictionaryCodes.add(new FastAssignment(iterator.getLen(), comm));
+                    } else if (comm.contains("->") && !comm.contains("\\->")) {
+                        dictionaryCodes.add(new VariableInject(iterator.getLen(), comm));
                     } else {
                         dictionaryCodes.add(new PlainText(iterator.getLen(), comm));
                     }

@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import io.github.seikodictionaryenginev2.base.util.DictionaryUtil;
 import io.github.seikodictionaryenginev2.base.util.calc.ComputeText;
+import io.github.seikodictionaryenginev2.base.util.express.Ref;
+import io.github.seikodictionaryenginev2.base.util.express.SettableRef;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -30,6 +32,14 @@ public class ComputeTest {
     void computeBoolean() {
         JSONObject object = JSON.parseObject("{\"a\":{\"b\":\"3\"},\"c\":[1,2,3,4,5]}");
         System.out.println(DictionaryUtil.evalBooleanExpression("{c(2)} == [{c(4)} - 2]",object));
+    }
+
+    @Test
+    void computeWrite() {
+        ComputeText c = new ComputeText("{C.C(0)}");
+        JSONObject object = JSON.parseObject("{\"A\":1,\"B\":2,\"C\":{\"A\":3,\"B\":4,\"C\":[1,2,3,4]},\"D\":[1,2,3,{\"114\":514}]}");
+        c.set(object, "114514");
+        System.out.println(object);
     }
 
 }

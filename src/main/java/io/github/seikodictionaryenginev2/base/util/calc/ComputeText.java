@@ -2,6 +2,7 @@ package io.github.seikodictionaryenginev2.base.util.calc;
 
 import com.alibaba.fastjson2.JSON;
 import io.github.seikodictionaryenginev2.base.util.express.Ref;
+import io.github.seikodictionaryenginev2.base.util.express.SettableRef;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.math.BigDecimal;
@@ -37,7 +38,8 @@ public class ComputeText implements Ref {
             JSON.parse(source);
             type = Type.JSON;
             return;
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         if (type != Type.STRING) {
             source = source.substring(1, source.length() - 1);
@@ -95,6 +97,18 @@ public class ComputeText implements Ref {
         this.format = result.toString();
     }
 
+    public void set(Map<String, Object> env, Object value) {
+        if (type == Type.REF) {
+            Object[] formatClone = new Object[this.args.size()];
+            for (int i = 0; i < args.size(); i++) {
+                formatClone[i] = args.get(i).get(env).toString();
+            }
+            String cw = String.format(format, formatClone).replace("\\n", "\n");
+            ((SettableRef) Ref.getRef("{" + cw + "}")).set(env, value);
+            return;
+        }
+        throw new UnsupportedOperationException("不允许为非表达式赋值");
+    }
     //对于SOURCE应该返回SOURCE本身
     //对于STRING和MATH表达式返回String
     //对于REF表达式返回Ref查询结果
@@ -111,7 +125,7 @@ public class ComputeText implements Ref {
         for (int i = 0; i < args.size(); i++) {
             formatClone[i] = args.get(i).get(env).toString();
         }
-        String cw = String.format(format, formatClone).replace("\\n","\n");
+        String cw = String.format(format, formatClone).replace("\\n", "\n");
 
         if (type == Type.STRING) {
             return cw;
@@ -130,7 +144,6 @@ public class ComputeText implements Ref {
         }
         return Ref.getRef("{" + cw + "}").get(env);
     }
-
 
     @Override
     public String toString() {

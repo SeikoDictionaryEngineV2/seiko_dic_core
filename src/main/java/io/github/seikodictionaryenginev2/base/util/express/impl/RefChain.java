@@ -1,6 +1,7 @@
 package io.github.seikodictionaryenginev2.base.util.express.impl;
 
 import io.github.seikodictionaryenginev2.base.util.express.Ref;
+import io.github.seikodictionaryenginev2.base.util.express.SettableRef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +13,15 @@ import java.util.Map;
  * @author kagg886
  * @date 2023/8/5 18:33
  **/
-public class RefChain implements Ref {
+public class RefChain implements Ref, SettableRef {
     private final List<Ref> elements;
 
     public RefChain() {
         this.elements = new ArrayList<>();
+    }
+
+    private RefChain(List<Ref> elements) {
+        this.elements = elements;
     }
 
     public List<Ref> getElements() {
@@ -35,7 +40,7 @@ public class RefChain implements Ref {
             try {
                 point = element.get((Map<String, Object>) point);
             } catch (ClassCastException e) {
-                throw new IllegalStateException("无法为非集合对象" +  elements.subList(0,i) + "求属性:" + element);
+                throw new IllegalStateException("无法为非集合对象" + elements.subList(0, i) + "求属性:" + element);
             }
         }
         return point;
@@ -56,7 +61,20 @@ public class RefChain implements Ref {
                 builder.append('.');
             }
 
-            return "{" + builder.substring(0,builder.length() - 1) + "}";
+            return "{" + builder.substring(0, builder.length() - 1) + "}";
         }
+    }
+
+    @Override
+    public void set(Map<String, Object> env, Object value) {
+        RefChain chain = new RefChain(elements.subList(0, elements.size() - 1));
+        Map<String, Object> map = ((Map<String, Object>) chain.get(env));
+        Ref set = elements.get(elements.size() - 1);
+
+        if (!(set instanceof SettableRef)) {
+            throw new UnsupportedOperationException("属性" + set + "不可写");
+        }
+
+        ((SettableRef) set).set(map, value);
     }
 }

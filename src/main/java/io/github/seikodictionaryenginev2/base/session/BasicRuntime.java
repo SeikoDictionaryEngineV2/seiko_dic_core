@@ -5,10 +5,7 @@ import io.github.seikodictionaryenginev2.base.entity.code.DictionaryCommandMatch
 import io.github.seikodictionaryenginev2.base.entity.DictionaryFile;
 import io.github.seikodictionaryenginev2.base.entity.code.func.Function;
 import io.github.seikodictionaryenginev2.base.entity.code.func.type.SendMessageWhenPostExecute;
-import io.github.seikodictionaryenginev2.base.entity.code.impl.Expression;
-import io.github.seikodictionaryenginev2.base.entity.code.impl.FastAssignment;
-import io.github.seikodictionaryenginev2.base.entity.code.impl.PlainText;
-import io.github.seikodictionaryenginev2.base.entity.code.impl.WhileLoop;
+import io.github.seikodictionaryenginev2.base.entity.code.impl.*;
 import io.github.seikodictionaryenginev2.base.env.DictionaryEnvironment;
 import io.github.seikodictionaryenginev2.base.exception.DictionaryOnRunningException;
 
@@ -171,6 +168,10 @@ public abstract class BasicRuntime<Event, Contact, MessageCache> {
 
             if (dic instanceof FastAssignment) {
                 ((FastAssignment) dic).addInRuntimeObject(this);
+            }
+
+            if (dic instanceof VariableInject) {
+                ((VariableInject) dic).injectObject(this);
             }
 
             if (dic instanceof Expression.If) {

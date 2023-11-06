@@ -22,6 +22,11 @@ public class ConstantRef extends ObjectRef {
     }
 
     @Override
+    public void set(Map<String, Object> env, Object value) {
+        throw new UnsupportedOperationException("常量Ref不支持这种操作!");
+    }
+
+    @Override
     public String toString() {
         if (Ref.DEBUG) {
             final StringBuilder sb = new StringBuilder("ConstantRef{");

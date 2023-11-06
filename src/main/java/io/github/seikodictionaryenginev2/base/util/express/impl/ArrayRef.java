@@ -2,6 +2,7 @@ package io.github.seikodictionaryenginev2.base.util.express.impl;
 
 
 import io.github.seikodictionaryenginev2.base.util.express.Ref;
+import io.github.seikodictionaryenginev2.base.util.express.SettableRef;
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Map;
  * @author kagg886
  * @date 2023/8/5 19:11
  **/
-public class ArrayRef implements Ref {
+public class ArrayRef implements Ref, SettableRef {
 
     private Ref arr;
     private Ref index;
@@ -68,6 +69,32 @@ public class ArrayRef implements Ref {
             throw new IllegalStateException("传入的下标:" + index.toString() + "不是数字");
         }
         return objects.get(index0);
+    }
+
+    @Override
+    public void set(Map<String, Object> env, Object value) {
+        List<Object> objects;
+
+
+        Object listOfStr = arr.get(env); //ref的计算结果可能是字符串
+        if (listOfStr instanceof String) {
+            objects = (List<Object>) new ObjectRef((String) listOfStr).get(env);
+        } else {
+            objects = (List<Object>) arr.get(env);
+        }
+
+        if (objects == null) {
+            throw new IllegalStateException("对象:" + arr.toString() + "不是列表");
+        }
+
+        int index0;
+        try {
+            index0 = Integer.parseInt(index.get(env).toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("传入的下标:" + index.toString() + "不是数字");
+        }
+        objects.remove(index0);
+        objects.add(index0, value);
     }
 
     @Override
