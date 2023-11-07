@@ -26,6 +26,10 @@ public class ComputeText implements Ref {
         return type;
     }
 
+    public int getArgsDeep() {
+        return args.size() + 1;
+    }
+
     public ComputeText(String source) {
         this.source = source;
         if (source.startsWith("[") && source.endsWith("]")) {

@@ -1,5 +1,7 @@
 package io.github.seikodictionaryenginev2.base.entity.code.impl;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
 import io.github.seikodictionaryenginev2.base.entity.code.DictionaryCode;
 import io.github.seikodictionaryenginev2.base.session.BasicRuntime;
 import io.github.seikodictionaryenginev2.base.util.calc.ComputeText;
@@ -22,7 +24,14 @@ public class PlainText extends DictionaryCode {
         text = new ComputeText(code);
     }
 
-    public String render(BasicRuntime<?,?,?> runtime) {
-        return text.get(runtime.getRuntimeObject()).toString();
+    public String render(BasicRuntime<?, ?, ?> runtime) {
+        try {
+            return text.get(runtime.getRuntimeObject()).toString();
+        } catch (JSONException e) {
+            if (text.getArgsDeep() != 1) {
+                throw e;
+            }
+            return "null";
+        }
     }
 }

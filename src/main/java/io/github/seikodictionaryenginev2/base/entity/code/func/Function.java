@@ -6,10 +6,7 @@ import io.github.seikodictionaryenginev2.base.entity.code.func.type.ArgumentLimi
 import io.github.seikodictionaryenginev2.base.session.BasicRuntime;
 import io.github.seikodictionaryenginev2.base.util.calc.ComputeText;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -30,6 +27,10 @@ public abstract class Function extends DictionaryCode {
     public Function(int line, String code) {
         super(line, code);
         int sIndex = code.indexOf(" ");
+        if (sIndex == -1) {
+            argCode = null;
+            return;
+        }
         argCode = code.substring(sIndex + 1, code.length() - 1);
     }
 
@@ -72,6 +73,9 @@ public abstract class Function extends DictionaryCode {
         int limit = 0;
         if (this instanceof ArgumentLimiter) {
             limit = ((ArgumentLimiter) this).getArgumentLength();
+        }
+        if (argCode == null) {
+            return invoke(runtime, new ArrayList<>());
         }
         List<Object> args = Arrays.stream(argCode.split(" ", limit))
                 .map(ComputeText::new)
