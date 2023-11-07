@@ -16,9 +16,9 @@ import io.github.seikodictionaryenginev2.base.util.calc.ComputeText;
  * @version: 1.0
  */
 public class FastAssignment extends DictionaryCode {
-    private final String varName;
+    private final ComputeText varRef; //方法名或引用
 
-    private final ComputeText text;
+    private final ComputeText text; //待执行字符串
 
     //此处的code类似A<-表达式，注意此处的表达式如果仅为Ref则需要返回引用结果而不是字符串
     public FastAssignment(int line, String code) {
@@ -27,38 +27,37 @@ public class FastAssignment extends DictionaryCode {
         //OBJ<-{"A","B"}
         //ARR<-[1,2,3]
         //CUS<-%A% %B%
+        //{A.B}<-sss
 
         //FUN<-$读 A.txt key value$
         super(line, code);
         String[] val = code.split("<-", 2);
-        varName = val[0];
+        varRef = new ComputeText(val[0]);
         text = new ComputeText(val[1]);
     }
 
     public void addInRuntimeObject(BasicRuntime<?, ?, ?> runtime) {
         String valueRef = text.getSource();
+        Object rtn;
         if (valueRef.startsWith("$") && valueRef.endsWith("$")) { //方法返回值注入模式
             try {
                 Function method = Function.parse(valueRef, getLine(), runtime.getFile().getFather());
-                Object rtn = method.invoke(runtime);
+                rtn = method.invoke(runtime);
                 if (rtn == null) {
                     throw new DictionaryOnRunningException(String.format("无法取得方法值:%s，因为方法值为空", method.getCode()));
                 }
-                runtime.getRuntimeObject().put(varName, rtn);
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
+        } else {
+            rtn = text.get(runtime.getRuntimeObject());
+        }
+        if (varRef.getType() == ComputeText.Type.REF) {
+            //注入
+            varRef.set(runtime.getRuntimeObject(), rtn);
             return;
         }
-
         //赋值模式
-        runtime.getRuntimeObject().put(varName, text.get(runtime.getRuntimeObject()));
-/*        try {
-            runtime.getRuntimeObject().put(varName, JSON.parseObject(valueRef));
-            return;
-        } catch (Exception ignored) {
-
-        }
-        runtime.getRuntimeObject().put(varName, DictionaryUtil.cleanVariableCode(valueRef, runtime));*/
+        runtime.getRuntimeObject().put(varRef.getSource(), text.get(runtime.getRuntimeObject()));
     }
 }

@@ -225,8 +225,6 @@ public class DictionaryFile {
                         }
                     } else if (comm.contains("<-") && !comm.contains("\\<-")) {
                         dictionaryCodes.add(new FastAssignment(iterator.getLen(), comm));
-                    } else if (comm.contains("->") && !comm.contains("\\->")) {
-                        dictionaryCodes.add(new VariableInject(iterator.getLen(), comm));
                     } else {
                         dictionaryCodes.add(new PlainText(iterator.getLen(), comm));
                     }

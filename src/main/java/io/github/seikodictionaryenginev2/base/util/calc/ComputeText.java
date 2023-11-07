@@ -24,6 +24,9 @@ public class ComputeText implements Ref {
 
     private final List<ComputeText> args = new ArrayList<>();
 
+    public Type getType() {
+        return type;
+    }
 
     public ComputeText(String source) {
         this.source = source;
@@ -99,16 +102,20 @@ public class ComputeText implements Ref {
 
     public void set(Map<String, Object> env, Object value) {
         if (type == Type.REF) {
-            Object[] formatClone = new Object[this.args.size()];
-            for (int i = 0; i < args.size(); i++) {
-                formatClone[i] = args.get(i).get(env).toString();
-            }
-            String cw = String.format(format, formatClone).replace("\\n", "\n");
-            ((SettableRef) Ref.getRef("{" + cw + "}")).set(env, value);
+            ((SettableRef) Ref.getRef("{" + formatToRefString(env) + "}")).set(env, value);
             return;
         }
         throw new UnsupportedOperationException("不允许为非表达式赋值");
     }
+
+    private String formatToRefString(Map<String, Object> env) {
+        Object[] formatClone = new Object[this.args.size()];
+        for (int i = 0; i < args.size(); i++) {
+            formatClone[i] = args.get(i).get(env).toString();
+        }
+        return String.format(format, formatClone).replace("\\n", "\n");
+    }
+
     //对于SOURCE应该返回SOURCE本身
     //对于STRING和MATH表达式返回String
     //对于REF表达式返回Ref查询结果
@@ -121,11 +128,7 @@ public class ComputeText implements Ref {
                 throw new IllegalArgumentException(source + "不是一个合法的json!");
             }
         }
-        Object[] formatClone = new Object[this.args.size()];
-        for (int i = 0; i < args.size(); i++) {
-            formatClone[i] = args.get(i).get(env).toString();
-        }
-        String cw = String.format(format, formatClone).replace("\\n", "\n");
+        String cw = formatToRefString(env);
 
         if (type == Type.STRING) {
             return cw;

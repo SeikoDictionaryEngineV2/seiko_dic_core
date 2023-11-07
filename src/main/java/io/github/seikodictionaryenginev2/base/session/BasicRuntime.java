@@ -170,10 +170,6 @@ public abstract class BasicRuntime<Event, Contact, MessageCache> {
                 ((FastAssignment) dic).addInRuntimeObject(this);
             }
 
-            if (dic instanceof VariableInject) {
-                ((VariableInject) dic).injectObject(this);
-            }
-
             if (dic instanceof Expression.If) {
                 ((Expression.If) dic).calc(this);
             }
