@@ -164,6 +164,9 @@ public class DictionaryFile {
         List<DictionaryCode> dictionaryCodes = new ArrayList<>();
         while (iterator.hasNext()) {
             String comm = iterator.next();
+            if (comm.startsWith("//")) {
+                continue; //忽略注释
+            }
 
             String prefix = TextUtils.repeat(" ", deep);
             if (comm.startsWith(prefix)) { //符合深度，开始填充
@@ -224,7 +227,14 @@ public class DictionaryFile {
                             throw new DictionaryOnLoadException("解析伪代码方法时出错!" + "(" + iterator.getLen() + ":" + comm + ")", e);
                         }
                     } else if (comm.contains("<-") && !comm.contains("\\<-")) {
-                        dictionaryCodes.add(new FastAssignment(iterator.getLen(), comm));
+                        //检测模板表达式，然后装载
+                        if (comm.contains("<-///")) {
+                            String key = comm.split("<-///")[0];
+                            comm = findAllTemplate(comm, iterator, deep);
+                            dictionaryCodes.add(new FastAssignment(iterator.getLen(), key + "<-" + comm));
+                        } else {
+                            dictionaryCodes.add(new FastAssignment(iterator.getLen(), comm));
+                        }
                     } else {
                         dictionaryCodes.add(new PlainText(iterator.getLen(), comm));
                     }
@@ -235,6 +245,24 @@ public class DictionaryFile {
             }
         }
         return dictionaryCodes;
+    }
+
+    private String findAllTemplate(String first, ArrayIterator<String> iterator, int deep) {
+        StringBuilder builder = new StringBuilder(first.split("<-///", 2)[1]);
+
+        String prefix = TextUtils.repeat(" ", deep);
+        while (iterator.hasNext()) {
+            String val = iterator.next();
+            if (val.startsWith(prefix)) {
+                builder.append("\n").append(val.substring(deep));
+                if (val.endsWith("///")) {
+                    return builder.substring(0, builder.length() - 3);
+                }
+            } else {
+                throw new DictionaryOnLoadException(String.format("在第%d行发现了深度错误!", iterator.getLen()));
+            }
+        }
+        return builder.toString();
     }
 
     public File getFile() {
