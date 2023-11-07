@@ -6,9 +6,7 @@ import io.github.seikodictionaryenginev2.base.util.express.SettableRef;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Ref的增强版，在Ref的基础上允许嵌套方括号算术表达式
@@ -136,8 +134,16 @@ public class ComputeText implements Ref {
         if (type == Type.MATH) {
             String result;
             try {
+                //对于[1,2,{A}]，此代码会报错。
                 result = new BigDecimal(Double.toString(new ExpressionBuilder(cw).build().evaluate())).toPlainString();
             } catch (IllegalArgumentException e) {
+                //检查一下是不是JSONArray被误解析。
+                ComputeText text = new ComputeText("[" + cw + "]");
+                try {
+                    return text.get(env);
+                } catch (Exception ignored) {
+                }
+
                 result = "NaN";
             }
             if (result.endsWith(".0")) { //小数整数化
@@ -145,7 +151,13 @@ public class ComputeText implements Ref {
             }
             return result;
         }
-        return Ref.getRef("{" + cw + "}").get(env);
+        try {
+            //对于{"A":{X}}此代码会报错。
+            return Optional.ofNullable(Ref.getRef("{" + cw + "}").get(env)).orElseThrow();
+        } catch (NoSuchElementException e) {
+            //有可能是JSONObject误包装
+            return JSON.parseObject("{" + cw + "}");
+        }
     }
 
     @Override

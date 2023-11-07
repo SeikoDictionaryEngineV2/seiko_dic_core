@@ -74,6 +74,7 @@ class DictionaryEnvironmentTest {
         //返回值会被写入到缓冲区中，如不想写入可返回null。
         @Override
         public Object run(BasicRuntime<?, ?, ?> runtime, List<Object> args) {
+            System.out.println(args);
             return "测试成功";
         }
     }
