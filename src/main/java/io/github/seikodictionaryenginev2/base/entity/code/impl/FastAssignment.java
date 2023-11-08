@@ -52,12 +52,14 @@ public class FastAssignment extends DictionaryCode {
         } else {
             rtn = text.get(runtime.getRuntimeObject());
         }
+
         if (varRef.getType() == ComputeText.Type.REF) {
             //注入
             varRef.set(runtime.getRuntimeObject(), rtn);
             return;
         }
-        //赋值模式
-        runtime.getRuntimeObject().put(varRef.getSource(), text.get(runtime.getRuntimeObject()));
+        //赋值模式，值为方法时
+        Object inject = text.getType() == ComputeText.Type.REF ? text.get(runtime.getRuntimeObject()) : rtn;
+        runtime.getRuntimeObject().put(varRef.getSource(), inject);
     }
 }
