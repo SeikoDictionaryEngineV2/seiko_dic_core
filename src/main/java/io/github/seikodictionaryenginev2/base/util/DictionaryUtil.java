@@ -28,7 +28,7 @@ public class DictionaryUtil {
     public static String cleanVariableCode(String code, Map<String,Object> runtime) {
         String clone = code.replace("\\n", "\n");
         ComputeText text = new ComputeText(clone);
-        return text.get(runtime).toString();
+        return String.valueOf(text.get(runtime));
     }
 
 
