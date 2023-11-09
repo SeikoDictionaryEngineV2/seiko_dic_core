@@ -93,8 +93,12 @@ public class ArrayRef implements Ref, SettableRef {
         } catch (NumberFormatException e) {
             throw new IllegalStateException("传入的下标:" + index.toString() + "不是数字");
         }
-        objects.remove(index0);
-        objects.add(index0, value);
+        if (objects.isEmpty()) {
+            objects.add(value);
+        } else {
+            objects.remove(index0);
+            objects.add(index0, value);
+        }
     }
 
     @Override
