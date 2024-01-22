@@ -2,7 +2,6 @@ package io.github.seikodictionaryenginev2.base.util.calc;
 
 import com.alibaba.fastjson2.JSON;
 import io.github.seikodictionaryenginev2.base.util.express.Ref;
-import io.github.seikodictionaryenginev2.base.util.express.SettableRef;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.math.BigDecimal;
@@ -157,7 +156,7 @@ public class ComputeText implements Ref {
         }
         try {
             //对于{"A":{X}}此代码会报错。
-            return Optional.ofNullable(Ref.getRef("{" + cw + "}").get(env)).orElseThrow();
+            return Optional.ofNullable(Ref.get("${" + cw + "}").get(env)).orElseThrow();
         } catch (NoSuchElementException e) {
             //有可能是JSONObject误包装
             return JSON.parseObject("{" + cw + "}");
@@ -166,14 +165,6 @@ public class ComputeText implements Ref {
 
     @Override
     public String toString() {
-        if (Ref.DEBUG) {
-            final StringBuilder sb = new StringBuilder("ComputeText{");
-            sb.append("format='").append(format).append('\'');
-            sb.append(", type=").append(type);
-            sb.append(", args=").append(args);
-            sb.append('}');
-            return sb.toString();
-        }
         return source;
     }
 

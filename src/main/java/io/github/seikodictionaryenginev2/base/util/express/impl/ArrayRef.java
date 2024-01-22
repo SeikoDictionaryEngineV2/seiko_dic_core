@@ -2,115 +2,77 @@ package io.github.seikodictionaryenginev2.base.util.express.impl;
 
 
 import io.github.seikodictionaryenginev2.base.util.express.Ref;
-import io.github.seikodictionaryenginev2.base.util.express.SettableRef;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * 数组ref
- *
- * @author kagg886
- * @date 2023/8/5 19:11
- **/
-public class ArrayRef implements Ref, SettableRef {
+ * @Author kagg886
+ * @Date 2024/1/22 下午7:31
+ * @description:
+ */
 
+public class ArrayRef implements Ref {
+    private final String source;
     private Ref arr;
     private Ref index;
 
-    public ArrayRef(String source) { //形如{k.x}({b.c(1)})
+    public ArrayRef(String template) {
+        this.source = template;
 
-        int braceLen = 0;
-        int parenthesisLen = 0;
-        StringBuilder buf = new StringBuilder();
-        for (int i = source.length() - 1; i >= 0; i--) {
-            char c = source.charAt(i);
+        char[] s = template.toCharArray();
 
-            if (c == '}') braceLen++;
-            if (c == '{') braceLen--;
-            if (c == ')') parenthesisLen++;
-            if (c == '(') parenthesisLen--;
-
-            buf.append(c);
-
-            if (parenthesisLen == 0 && braceLen == 0) {
-                String index = buf.reverse().substring(1, buf.length() - 1);
-                try {
-                    this.index = Ref.getRef(index);
-                } catch (IllegalArgumentException e) {
-                    this.index = new ConstantRef(index);
+        int deep = 0;
+        int thesis = -1;
+        for (int i = s.length - 1; i >= 0; i--) {
+            if (s[i] == ')') {
+                deep++;
+            }
+            if (s[i] == '(') {
+                deep--;
+                if (deep == 0) {
+                    thesis = i;
                 }
-                this.arr = Ref.getRef("{" + source.substring(0, i) + "}");
-                return;
             }
         }
+        String index = template.substring(thesis + 1, template.length() - 1);
+        String arr = template.substring(0, thesis); //先FormatRef，得到的结果当作ObjectRef
+
+        this.arr = Ref.get("${" + arr + "}");
+
+        //index不可能是除了ObjectRef以外的Ref
+        this.index = index.startsWith("${") && index.endsWith("}") ? new ObjectRef(index.substring(2, index.length() - 1)) : new Ref() {
+            @Override
+            public Object eval(Map<String, Object> data, Map<String, Object> root) {
+                return index;
+            }
+
+            @Override
+            public void insert(Map<String, Object> data, Map<String, Object> root, Object value) {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     @Override
-    public Object get(Map<String, Object> env) {
-        List<Object> objects;
-
-
-        Object listOfStr = arr.get(env); //ref的计算结果可能是字符串
-        if (listOfStr instanceof String) {
-            objects = (List<Object>) new ObjectRef((String) listOfStr).get(env);
+    public Object eval(Map<String, Object> data, final Map<String, Object> root) {
+        List<Object> o;
+        if (arr instanceof FormatRef) {
+            o = ((List<Object>) new ObjectRef(arr.eval(data).toString()).eval(root));
         } else {
-            objects = (List<Object>) arr.get(env);
+            o = (List<Object>) arr.eval(data);
         }
-
-        if (objects == null) {
-            throw new IllegalStateException("对象:" + arr.toString() + "不是列表");
-        }
-
-        int index0;
-        try {
-            index0 = Integer.parseInt(index.get(env).toString());
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("传入的下标:" + index.toString() + "不是数字");
-        }
-        return objects.get(index0);
+        return o.get(Integer.parseInt(index.eval(root).toString()));
     }
 
     @Override
-    public void set(Map<String, Object> env, Object value) {
-        List<Object> objects;
-
-
-        Object listOfStr = arr.get(env); //ref的计算结果可能是字符串
-        if (listOfStr instanceof String) {
-            objects = (List<Object>) new ObjectRef((String) listOfStr).get(env);
+    public void insert(Map<String, Object> data, Map<String, Object> root, Object value) {
+        List<Object> o;
+        if (arr instanceof FormatRef) {
+            o = ((List<Object>) new ObjectRef(arr.eval(data).toString()).eval(root));
         } else {
-            objects = (List<Object>) arr.get(env);
+            o = (List<Object>) arr.eval(data);
         }
-
-        if (objects == null) {
-            throw new IllegalStateException("对象:" + arr.toString() + "不是列表");
-        }
-
-        int index0;
-        try {
-            index0 = Integer.parseInt(index.get(env).toString());
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("传入的下标:" + index.toString() + "不是数字");
-        }
-        if (objects.isEmpty()) {
-            objects.add(value);
-        } else {
-            objects.remove(index0);
-            objects.add(index0, value);
-        }
-    }
-
-    @Override
-    public String toString() {
-        if (DEBUG) {
-            final StringBuilder sb = new StringBuilder("ArrayRef{");
-            sb.append("arr=").append(arr);
-            sb.append(", index=").append(index);
-            sb.append('}');
-            return sb.toString();
-        } else {
-            return String.format("%s(%s)", arr.toString(), index.toString());
-        }
+        o.add(Integer.parseInt(index.eval(root).toString()), value);
     }
 }

@@ -26,7 +26,7 @@ public class FastAssignment extends DictionaryCode {
         //NUM<-6
         //OBJ<-{"A","B"}
         //ARR<-[1,2,3]
-        //CUS<-%A% %B%
+        //CUS<-${A} ${B}
         //{A.B}<-sss
 
         //FUN<-$读 A.txt key value$

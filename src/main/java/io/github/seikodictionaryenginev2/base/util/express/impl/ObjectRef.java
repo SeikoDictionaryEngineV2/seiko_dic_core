@@ -1,41 +1,34 @@
 package io.github.seikodictionaryenginev2.base.util.express.impl;
 
 import io.github.seikodictionaryenginev2.base.util.express.Ref;
-import io.github.seikodictionaryenginev2.base.util.express.SettableRef;
 
 import java.util.Map;
 
 /**
- * 对对象取引用
- *
- * @author kagg886
- * @date 2023/8/5 18:37
- **/
-public class ObjectRef implements Ref, SettableRef {
-    protected String source;
+ * @Author kagg886
+ * @Date 2024/1/22 下午7:12
+ * @description:
+ */
+
+public class ObjectRef implements Ref {
+    private final String key;
 
     public ObjectRef(String s) {
-        this.source = s;
-    }
-    @Override
-    public Object get(Map<String, Object> env) {
-        return env.getOrDefault(source,null);
+        this.key = s;
     }
 
     @Override
-    public void set(Map<String, Object> env, Object value) {
-        env.put(source, value);
+    public Object eval(Map<String, Object> data,final Map<String,Object> root) {
+        return data.get(key);
+    }
+
+    @Override
+    public void insert(Map<String, Object> data,Map<String,Object> root, Object value) {
+        data.put(key,value);
     }
 
     @Override
     public String toString() {
-        if (DEBUG) {
-            final StringBuilder sb = new StringBuilder("ObjectRef{");
-            sb.append("source='").append(source).append('\'');
-            sb.append('}');
-            return sb.toString();
-        } else {
-            return source;
-        }
+        return key;
     }
 }

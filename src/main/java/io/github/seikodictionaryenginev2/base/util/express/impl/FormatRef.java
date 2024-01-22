@@ -1,81 +1,71 @@
 package io.github.seikodictionaryenginev2.base.util.express.impl;
 
+
 import io.github.seikodictionaryenginev2.base.util.express.Ref;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
- * 单元中含别的表达式
- *
- * @author kagg886
- * @date 2023/8/5 19:44
- **/
+ * @Author kagg886
+ * @Date 2024/1/22 下午7:31
+ * @description:
+ */
+
 public class FormatRef implements Ref {
-    private final String formatStr;
     private final String source;
+    private String template;
+    private List<Ref> val = new ArrayList<>();
 
-    private final List<Ref> args = new ArrayList<>();
-
-    public FormatRef(String source) { //形如a{b}{c}
+    public FormatRef(String source) {
         this.source = source;
-        StringBuilder result = new StringBuilder();
-        int braceCount = 0;
-        int braceLIndex = 0;
+        Map<Integer, Integer> points = new LinkedHashMap<>();
 
-        for (int i = 0; i < source.length(); i++) {
-            char c = source.charAt(i);
-            if (c == '{') {
-                if (braceCount == 0) {
-                    braceLIndex = i;
-                }
-                braceCount++;
+        char[] chr = source.toCharArray();
+        int lIndex = -1;
+        int deep = 0; //深度
+        for (int i = 0; i < chr.length; i++) {
+            //遇到Ref头符号则深度+1
+            if (chr[i] == '$' && chr[i + 1] == '{' && deep == 0) {
+                deep++;
+                lIndex = i;
             }
 
-            if (c == '}') {
-                braceCount--;
-                if (braceCount == 0) {
-                    String format = source.substring(braceLIndex, i + 1);
-                    args.add(Ref.getRef(format));
-                    result.append("%s");
-                    continue;
+            //遇到Ref终止符号则深度-1
+            if (chr[i] == '}') {
+                deep--;
+                //若深度恰好为0证明一个Ref字符串已解析完毕
+                if (deep == 0) {
+                    points.put(lIndex, i + 1);
                 }
-            }
-
-            if (braceCount == 0) {
-                result.append(c);
             }
         }
 
-        formatStr = result.toString();
-    }
-
-    public FormatRef(String source, String formatStr, List<Ref> args) {
-        this.formatStr = formatStr;
-        this.source = source;
-        this.args.addAll(args);
+        this.template = source;
+        //替换
+        points.entrySet().stream().map((e) -> source.substring(e.getKey(),e.getValue())).peek((v) -> {
+            val.add(Ref.get(v));
+        }).forEach((v) -> {
+            template = template.replace(v,"%s");
+        });
     }
 
     @Override
-    public Object get(Map<String, Object> env) {
-        Object[] args = new String[this.args.size()];
-        for (int i = 0; i < args.length; i++) {
-            args[i] = this.args.get(i).get(env).toString();
+    public Object eval(Map<String, Object> data,final Map<String,Object> root) {
+        Object[] str = new String[val.size()];
+
+        for (int i = 0; i < val.size(); i++) {
+            str[i] = val.get(i).eval(root).toString();
         }
-        return String.format(formatStr, args);
+        return String.format(template,str);
+    }
+
+    @Override
+    public void insert(Map<String, Object> data,Map<String,Object> root ,Object value) {
+        throw new UnsupportedOperationException("Not Supported");
     }
 
     @Override
     public String toString() {
-        if (DEBUG) {
-            final StringBuilder sb = new StringBuilder("FormatRef{");
-            sb.append("formatStr='").append(formatStr).append('\'');
-            sb.append(", args=").append(args);
-            sb.append('}');
-            return sb.toString();
-        } else {
-            return source;
-        }
+        return source;
     }
 }
