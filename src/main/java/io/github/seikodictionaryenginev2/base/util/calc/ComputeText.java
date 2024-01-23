@@ -1,182 +1,252 @@
 package io.github.seikodictionaryenginev2.base.util.calc;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
 import io.github.seikodictionaryenginev2.base.util.express.Ref;
+import io.github.seikodictionaryenginev2.base.util.express.impl.FormatRef;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Ref的增强版，在Ref的基础上允许嵌套方括号算术表达式
+ * <p>
+ * 1. $[]数学表达式  --> Type.MATH
+ * 2. {},[]等JSON块 --> Type.JSON
+ * 3. ${} -->Type.REF
+ * 4. abc${a.b($[1+2])} -->Type.FMT_A
+ * 5. abc$[1+${a}] -->Type.FMT_B
  *
  * @author kagg886
  * @date 2023/8/28 20:43
  **/
 public class ComputeText implements Ref {
-    private final String source;
-    private String format;
-
+    private String source;
     private Type type;
+    private Ref mod;
 
-    private final List<ComputeText> args = new ArrayList<>();
 
-    public Type getType() {
-        return type;
-    }
-
-    public int getArgsDeep() {
-        return args.size() + 1;
-    }
+    //为FMT_A和FMT_B时的格式化参数
+    private String template;
+    private List<Ref> args = new ArrayList<>();
 
     public ComputeText(String source) {
         this.source = source;
-        if (source.startsWith("[") && source.endsWith("]")) {
-            type = Type.MATH;
-        } else if (source.startsWith("{") && source.endsWith("}")) {
-            type = Type.REF;
-        } else {
-            type = Type.STRING;
-        }
+
         try {
             JSON.parse(source);
             type = Type.JSON;
             return;
-        } catch (Exception ignored) {
+        } catch (JSONException ignored) {
         }
 
-        if (type != Type.STRING) {
-            source = source.substring(1, source.length() - 1);
-        }
-
-        char[] chars = source.toCharArray();
-
-        int braceLIndex = 0;
-        int braceDepth = 0;
-        int squareLIndex = 0;
-        int squareDepth = 0;
-
-        StringBuilder result = new StringBuilder();
-
-        for (int i = 0; i < chars.length; i++) {
-            char c = chars[i];
-
-            if (c == '{') {
-                if (braceDepth == 0) {
-                    braceLIndex = i;
-                }
-                braceDepth++;
-            }
-
-            if (c == '}') {
-                braceDepth--;
-                if (braceDepth == 0 && squareDepth == 0) {
-                    result.append("%s");
-                    args.add(new ComputeText(source.substring(braceLIndex, i + 1)));
-                    continue;
-                }
-            }
-
-            if (c == '[') {
-                if (squareDepth == 0) {
-                    squareLIndex = i;
-                }
-                squareDepth++;
-            }
-            if (c == ']') {
-                squareDepth--;
-                if (squareDepth == 0 && braceDepth == 0) {
-                    result.append("%s");
-                    args.add(new ComputeText(source.substring(squareLIndex, i + 1)));
-                    continue;
-                }
-            }
-
-            //深度全部为0证明此时的c不在表达式里，需要放到result中
-            if (braceDepth == 0 && squareDepth == 0) {
-                result.append(c);
-            }
-        }
-
-        this.format = result.toString();
-    }
-
-    public void set(Map<String, Object> env, Object value) {
-        if (type == Type.REF) {
-            ((SettableRef) Ref.getRef("{" + formatToRefString(env) + "}")).set(env, value);
+        if (source.startsWith("$[") && source.endsWith("]") && !source.contains("${")) {
+            type = Type.MATH;
             return;
         }
-        throw new UnsupportedOperationException("不允许为非表达式赋值");
-    }
 
-    private String formatToRefString(Map<String, Object> env) {
-        Object[] formatClone = new Object[this.args.size()];
-        for (int i = 0; i < args.size(); i++) {
-            formatClone[i] = args.get(i).get(env).toString();
+        if (source.startsWith("${") && source.endsWith("}") && !source.contains("$[")) {
+            mod = Ref.get(source);
+            type = Type.REF;
+            return;
         }
-        return String.format(format, formatClone).replace("\\n", "\n");
-    }
 
-    //对于SOURCE应该返回SOURCE本身
-    //对于STRING和MATH表达式返回String
-    //对于REF表达式返回Ref查询结果
-    @Override
-    public Object get(Map<String, Object> env) {
-        if (type == Type.JSON) {
-            try {
-                return JSON.parse(source);
-            } catch (Exception e) {
-                throw new IllegalArgumentException(source + "不是一个合法的json!");
-            }
-        }
-        String cw = formatToRefString(env);
+        int dol = source.indexOf("$", -1);
 
-        if (type == Type.STRING) {
-            return cw;
+        if (source.toCharArray()[dol + 1] == '{') {
+            type = Type.FMT_A;
         }
-        if (type == Type.MATH) {
-            String result;
-            try {
-                //对于[1,2,{A}]，此代码会报错。
-                result = new BigDecimal(Double.toString(new ExpressionBuilder(cw).build().evaluate())).toPlainString();
-            } catch (IllegalArgumentException e) {
-                //检查一下是不是JSONArray被误解析。
-                ComputeText text = new ComputeText("[" + cw + "]");
-                try {
-                    return text.get(env);
-                } catch (Exception ignored) {
+
+        if (source.toCharArray()[dol + 1] == '[') {
+            type = Type.FMT_B;
+        }
+
+        if (type == Type.FMT_A) {
+            //扫描里面的$[]块放入args中
+
+            Map<Integer, Integer> points = new LinkedHashMap<>();
+
+            char[] chr = source.toCharArray();
+            int lIndex = -1;
+            int deep = 0; //深度
+            for (int i = 0; i < chr.length; i++) {
+                //遇到Ref头符号则深度+1
+                if (chr[i] == '$' && chr[i + 1] == '[' && deep == 0) {
+                    deep++;
+                    lIndex = i;
                 }
 
-                result = "NaN";
+                //遇到Ref终止符号则深度-1
+                if (chr[i] == ']') {
+                    deep--;
+                    //若深度恰好为0证明一个Ref字符串已解析完毕
+                    if (deep == 0) {
+                        points.put(lIndex, i + 1);
+                    }
+                }
             }
-            if (result.endsWith(".0")) { //小数整数化
-                result = result.substring(0, result.length() - 2);
+
+            if (deep!=0) {
+                throw new IllegalArgumentException("参数解析失败!原因:发现未闭合的计算块");
             }
-            return result;
+
+            this.template = source;
+            //替换
+            points.entrySet().stream().map((e) -> source.substring(e.getKey(), e.getValue())).peek((v) -> {
+                args.add(new ComputeText(v));
+            }).forEach((v) -> {
+                template = template.replace(v, "%s");
+            });
         }
-        try {
-            //对于{"A":{X}}此代码会报错。
-            return Optional.ofNullable(Ref.get("${" + cw + "}").get(env)).orElseThrow();
-        } catch (NoSuchElementException e) {
-            //有可能是JSONObject误包装
-            return JSON.parseObject("{" + cw + "}");
+
+        if (type == Type.FMT_B) {
+            //扫描里面的${}块放入args中
+
+            Map<Integer, Integer> points = new LinkedHashMap<>();
+
+            char[] chr = source.toCharArray();
+            int lIndex = -1;
+            int deep = 0; //深度
+            for (int i = 0; i < chr.length; i++) {
+                //遇到Ref头符号则深度+1
+                if (chr[i] == '$' && chr[i + 1] == '{' && deep == 0) {
+                    deep++;
+                    lIndex = i;
+                }
+
+                //遇到Ref终止符号则深度-1
+                if (chr[i] == '}') {
+                    deep--;
+                    //若深度恰好为0证明一个Ref字符串已解析完毕
+                    if (deep == 0) {
+                        points.put(lIndex, i + 1);
+                    }
+                }
+            }
+
+            if (deep!=0) {
+                throw new IllegalArgumentException("参数解析失败!原因:发现未闭合的取值表达式");
+            }
+
+            this.template = source;
+            //替换
+            points.entrySet().stream().map((e) -> source.substring(e.getKey(), e.getValue())).peek((v) -> {
+                args.add(new ComputeText(v));
+            }).forEach((v) -> {
+                template = template.replace(v, "%s");
+            });
+        }
+        if (args.isEmpty()) {
+            //FMT_A在arg为0时会退化为FormatRef
+            if (type == Type.FMT_A) {
+                type = Type.REF;
+                mod = new FormatRef(source);
+            }
+
+            //FMT_B在arg为0时代表着abc$[]这样的纯计算式
+            if (type == Type.FMT_B) {
+                Map<Integer, Integer> points = new LinkedHashMap<>();
+
+                char[] chr = source.toCharArray();
+                int lIndex = -1;
+                int deep = 0; //深度
+                for (int i = 0; i < chr.length; i++) {
+                    //遇到Ref头符号则深度+1
+                    if (chr[i] == '$' && chr[i + 1] == '[' && deep == 0) {
+                        deep++;
+                        lIndex = i;
+                    }
+
+                    //遇到Ref终止符号则深度-1
+                    if (chr[i] == ']') {
+                        deep--;
+                        //若深度恰好为0证明一个Ref字符串已解析完毕
+                        if (deep == 0) {
+                            points.put(lIndex, i + 1);
+                        }
+                    }
+                }
+
+                this.template = source;
+                //替换
+                points.entrySet().stream().map((e) -> source.substring(e.getKey(), e.getValue())).peek((v) -> {
+                    args.add(new ComputeText(v));
+                }).forEach((v) -> {
+                    template = template.replace(v, "%s");
+                });
+            }
         }
     }
 
-    @Override
-    public String toString() {
-        return source;
+    public Type getType() {
+        return type;
     }
 
     public String getSource() {
         return source;
     }
 
-    //代表最终对Get处理结果的差异
+    @Override
+    public Object eval(Map<String, Object> data, Map<String, Object> root) {
+        if (type == null) {
+            return source;
+        }
+        switch (type) {
+            case REF -> {
+                return mod.eval(data, root);
+            }
+            case MATH -> {
+                String result;
+                try {
+                    result = BigDecimal.valueOf(new ExpressionBuilder(source.substring(2, source.length() - 1)).build().evaluate()).toPlainString();
+                } catch (NumberFormatException e) {
+                    result = "NaN";
+                }
+                if (result.endsWith(".0")) { //小数整数化
+                    result = result.substring(0, result.length() - 2);
+                }
+                return result;
+            }
+
+            case JSON -> {
+                return JSON.parse(source);
+            }
+            case FMT_A,FMT_B -> {
+                Object[] str = new String[args.size()];
+
+                for (int i = 0; i < args.size(); i++) {
+                    str[i] = args.get(i).eval(root).toString();
+                }
+                return new ComputeText(String.format(template,str)).eval(root);
+            }
+        }
+        return source;
+    }
+
+    @Override
+    public void insert(Map<String, Object> data, Map<String, Object> root, Object value) {
+        if (getType() != Type.REF) {
+            throw new UnsupportedOperationException();
+        }
+        mod.insert(data, root, value);
+    }
+
+
     public enum Type {
-        JSON, //对于误解析字符串应该返回其本身，例如json
-        STRING, //代表CT应该是一个字符串
-        MATH, //代表CT应该是一个数学表达式
-        REF //代表CT应该是一个Ref表达式
+        MATH,
+        JSON,
+        REF,
+
+        FMT_A,
+        FMT_B,
+    }
+
+    @Override
+    public String toString() {
+        return source;
     }
 }

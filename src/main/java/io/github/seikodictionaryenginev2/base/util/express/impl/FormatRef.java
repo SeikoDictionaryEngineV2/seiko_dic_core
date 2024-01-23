@@ -16,6 +16,12 @@ public class FormatRef implements Ref {
     private String template;
     private List<Ref> val = new ArrayList<>();
 
+    public FormatRef(String template,List<Ref> val) {
+        this.template = template;
+        this.val = val;
+        this.source = String.format(template,val.toArray());
+    }
+
     public FormatRef(String source) {
         this.source = source;
         Map<Integer, Integer> points = new LinkedHashMap<>();
@@ -38,6 +44,11 @@ public class FormatRef implements Ref {
                     points.put(lIndex, i + 1);
                 }
             }
+        }
+
+
+        if (deep!=0) {
+            throw new IllegalArgumentException("参数解析失败!原因:发现未闭合的表达式");
         }
 
         this.template = source;

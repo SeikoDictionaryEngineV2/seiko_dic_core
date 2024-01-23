@@ -79,7 +79,7 @@ public abstract class Function extends DictionaryCode {
         }
         List<Object> args = Arrays.stream(argCode.split(" ", limit))
                 .map(ComputeText::new)
-                .map((v) -> v.get(runtime.getRuntimeObject()))
+                .map((v) -> v.eval(runtime.getRuntimeObject()))
                 .collect(Collectors.toList());
         return invoke(runtime, args);
     }

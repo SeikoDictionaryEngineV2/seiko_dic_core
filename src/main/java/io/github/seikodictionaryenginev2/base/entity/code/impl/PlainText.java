@@ -25,13 +25,6 @@ public class PlainText extends DictionaryCode {
     }
 
     public String render(BasicRuntime<?, ?, ?> runtime) {
-        try {
-            return text.get(runtime.getRuntimeObject()).toString();
-        } catch (JSONException e) {
-            if (text.getArgsDeep() != 1) {
-                throw e;
-            }
-            return "null";
-        }
+        return text.eval(runtime.getRuntimeObject()).toString();
     }
 }

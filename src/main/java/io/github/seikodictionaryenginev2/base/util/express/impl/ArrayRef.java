@@ -14,8 +14,14 @@ import java.util.Map;
 
 public class ArrayRef implements Ref {
     private final String source;
-    private Ref arr;
-    private Ref index;
+    private final Ref arr;
+    private final Ref index;
+
+    private ArrayRef(Ref arr, Ref index) {
+        this.source = arr.toString() + "(" + index.toString() + ")";
+        this.arr = arr;
+        this.index = index;
+    }
 
     public ArrayRef(String template) {
         this.source = template;
@@ -56,13 +62,17 @@ public class ArrayRef implements Ref {
 
     @Override
     public Object eval(Map<String, Object> data, final Map<String, Object> root) {
-        List<Object> o;
+        Object o;
         if (arr instanceof FormatRef) {
-            o = ((List<Object>) new ObjectRef(arr.eval(data).toString()).eval(root));
+            o = new ObjectRef(arr.eval(data).toString()).eval(root);
         } else {
-            o = (List<Object>) arr.eval(data);
+            o = arr.eval(data);
         }
-        return o.get(Integer.parseInt(index.eval(root).toString()));
+
+        if (!(o instanceof List<?>)) {
+            throw new IllegalStateException(arr + "的类型不是列表，无法对其运用()进行取值");
+        }
+        return ((List<?>) o).get(Integer.parseInt(index.eval(root).toString()));
     }
 
     @Override

@@ -1,7 +1,7 @@
 #Seiko词库V2
 
 [控制台]qwq
-如果:{B}==null
+如果:${B}==null
  OK!
 如果尾
  false!

@@ -18,28 +18,14 @@ import java.util.function.Function;
  */
 public class DictionaryUtil {
     /*
-     * @param :
-     * @return String
-     * @author kagg886
-     * @description 将{a.b.c}或{a(0).b}转换成字符串
-     * @date 2023/01/13 09:44
-     */
-
-    public static String cleanVariableCode(String code, Map<String,Object> runtime) {
-        String clone = code.replace("\\n", "\n");
-        ComputeText text = new ComputeText(clone);
-        return String.valueOf(text.get(runtime));
-    }
-
-
-    /*
      * @param str: 传入的布尔表达式
      * @return boolean
      * @author kagg886
      * @description 评估布尔表达式
      * @date 2023/01/28 21:33
      */
-    public static boolean evalBooleanExpression(String str, Map<String,Object> runtime) {
+    public static boolean evalBooleanExpression(String str, Map<String, Object> runtime) {
+        str = new ComputeText(str).eval(runtime).toString();
         if (str == null || str.equals("")) {
             throw new NullPointerException("表达式为空");
         }
@@ -75,51 +61,33 @@ public class DictionaryUtil {
             return evalBooleanExpression(str.substring(0, idx), runtime) && evalBooleanExpression(str.substring(idx + 2), runtime);
         }
 
-        Function<String,Double> varCalc = (deal) -> {
-            try {
-                return Double.parseDouble(deal);
-            } catch (NumberFormatException e) {
-                ComputeText text = new ComputeText("[" + deal + "]");
-                return Double.parseDouble(text.get(runtime).toString());
-            }
-        };
-
         if (str.contains("==")) {
             int idx = str.indexOf("==");
-            try {
-                return Objects.equals(varCalc.apply(str.substring(0, idx)), varCalc.apply(str.substring(idx + 2)));
-            } catch (Exception e) {
-                // 代表等式左边或右边是字符串，按照字符串进行匹配
-                return DictionaryUtil.cleanVariableCode(str.substring(0, idx), runtime).equals(DictionaryUtil.cleanVariableCode(str.substring(idx + 2), runtime));
-            }
+            return Objects.equals(str.substring(0, idx), str.substring(idx + 2));
         }
 
         if (str.contains("!=")) {
             int idx = str.indexOf("!=");
-            try {
-                return !Objects.equals(varCalc.apply(str.substring(0, idx)), varCalc.apply(str.substring(idx + 2)));
-            } catch (Exception e) {
-                return !DictionaryUtil.cleanVariableCode(str.substring(0, idx), runtime).equals(DictionaryUtil.cleanVariableCode(str.substring(idx + 2), runtime));
-            }
+            return !Objects.equals(str.substring(0, idx), str.substring(idx + 2));
         }
 
 
         if (str.contains(">=")) {
             int idx = str.indexOf(">=");
-            return varCalc.apply(str.substring(0, idx)) >= varCalc.apply(str.substring(idx + 2));
+            return Double.parseDouble(str.substring(0, idx)) >= Double.parseDouble(str.substring(idx + 2));
         }
         if (str.contains("<=")) {
             int idx = str.indexOf("<=");
-            return varCalc.apply(str.substring(0, idx)) <= varCalc.apply(str.substring(idx + 2));
+            return Double.parseDouble(str.substring(0, idx)) <= Double.parseDouble(str.substring(idx + 2));
 
         }
         if (str.contains(">")) {
             int idx = str.indexOf(">");
-            return varCalc.apply(str.substring(0, idx)) > varCalc.apply(str.substring(idx + 1));
+            return Double.parseDouble(str.substring(0, idx)) > Double.parseDouble(str.substring(idx + 1));
         }
         if (str.contains("<")) {
             int idx = str.indexOf("<");
-            return varCalc.apply(str.substring(0, idx)) < varCalc.apply(str.substring(idx + 1));
+            return Double.parseDouble(str.substring(0, idx)) < Double.parseDouble(str.substring(idx + 1));
 
         }
         throw new DictionaryOnRunningException("计算表达式出错!" + str);

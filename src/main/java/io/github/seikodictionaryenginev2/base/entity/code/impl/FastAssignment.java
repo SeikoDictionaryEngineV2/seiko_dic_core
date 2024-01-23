@@ -50,16 +50,16 @@ public class FastAssignment extends DictionaryCode {
                 throw new RuntimeException(e);
             }
         } else {
-            rtn = text.get(runtime.getRuntimeObject());
+            rtn = text.eval(runtime.getRuntimeObject());
         }
 
         if (varRef.getType() == ComputeText.Type.REF) {
             //注入
-            varRef.set(runtime.getRuntimeObject(), rtn);
+            varRef.insert(runtime.getRuntimeObject(), rtn);
             return;
         }
         //赋值模式，值为方法时
-        Object inject = text.getType() == ComputeText.Type.REF ? text.get(runtime.getRuntimeObject()) : rtn;
+        Object inject = text.getType() == ComputeText.Type.REF ? text.eval(runtime.getRuntimeObject()) : rtn;
         runtime.getRuntimeObject().put(varRef.getSource(), inject);
     }
 }

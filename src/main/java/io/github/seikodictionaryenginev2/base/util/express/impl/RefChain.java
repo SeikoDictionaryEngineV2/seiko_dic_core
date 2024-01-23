@@ -1,5 +1,6 @@
 package io.github.seikodictionaryenginev2.base.util.express.impl;
 
+import io.github.seikodictionaryenginev2.base.exception.DictionaryOnRunningException;
 import io.github.seikodictionaryenginev2.base.util.express.Ref;
 
 import java.nio.file.Path;
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Author kagg886
@@ -34,7 +36,12 @@ public class RefChain extends ArrayList<Ref> implements Ref {
                 pointer = new ObjectRef(ref.eval(root).toString()).eval(((Map<String, Object>) pointer));
                 continue;
             }
-            pointer = ref.eval((Map<String, Object>) pointer, root);
+            try {
+                pointer = ref.eval((Map<String, Object>) pointer, root);
+            } catch (NullPointerException e) {
+                RefChain c = new RefChain(subList(0, this.indexOf(ref)));
+                throw new NullPointerException("表达式计算有误：" + c.toString() + "的结果为null，不可以继续取属性" + ref.toString());
+            }
         }
         return pointer == data ? null : pointer;
     }
@@ -51,5 +58,10 @@ public class RefChain extends ArrayList<Ref> implements Ref {
             pointer = ref.eval((Map<String, Object>) pointer, root);
         }
         get(size() - 1).insert(((Map<String, Object>) pointer), root, value);
+    }
+
+    @Override
+    public String toString() {
+        return stream().map(Ref::toString).collect(Collectors.joining("."));
     }
 }
