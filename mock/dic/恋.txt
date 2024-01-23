@@ -2,6 +2,7 @@
 
 [控制台]qwq
 如果:${B}==null
- OK!
+ OK!\n
+ 这是一个Demo！
 如果尾
  false!

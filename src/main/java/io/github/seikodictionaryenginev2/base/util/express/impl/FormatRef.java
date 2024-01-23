@@ -65,7 +65,7 @@ public class FormatRef implements Ref {
         Object[] str = new String[val.size()];
 
         for (int i = 0; i < val.size(); i++) {
-            str[i] = val.get(i).eval(root).toString();
+            str[i] = Optional.ofNullable(val.get(i).eval(root)).orElse("null").toString();
         }
         return String.format(template,str);
     }

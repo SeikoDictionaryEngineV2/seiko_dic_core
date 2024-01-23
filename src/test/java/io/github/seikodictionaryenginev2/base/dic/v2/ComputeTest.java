@@ -195,4 +195,32 @@ public class ComputeTest {
         }
     }
 
+    @Test
+    void testFakeRef() {
+        ComputeText x = new ComputeText("${a} is ${b}");
+        String s = x.eval(new JSONObject() {{
+            put("a",1);
+            put("b",2);
+        }}).toString();
+
+        assertEquals("1 is 2",s);
+    }
+
+    @Test
+    void testFakeMath() {
+        ComputeText t = new ComputeText("$[1+2] is $[3]");
+        assertEquals("3 is 3",t.eval(null));
+    }
+
+    @Test
+    void testRegex() {
+
+        ComputeText x = new ComputeText("$[0-9]");
+        String s = x.eval(null).toString();
+        System.out.println(s);
+        x = new ComputeText("[0-9]+");
+        s = x.eval(null).toString();
+
+    }
+
 }

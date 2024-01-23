@@ -45,23 +45,70 @@ public class ComputeText implements Ref {
         }
 
         if (source.startsWith("$[") && source.endsWith("]") && !source.contains("${")) {
-            type = Type.MATH;
-            return;
+            boolean sig = false;
+
+            char[] chr = source.toCharArray();
+            int deep = 0; //深度
+            for (int i = 0; i < chr.length; i++) {
+                if (chr[i] == '$' && chr[i + 1] == '[' && deep == 0) {
+                    deep++;
+                }
+                if (chr[i] == ']') {
+                    deep--;
+                    if (deep == 0) {
+                        if (i == chr.length - 1) {
+                            sig = true;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (sig) {
+                type = Type.MATH;
+                return;
+            } else {
+                type = Type.FMT_B;
+            }
         }
 
         if (source.startsWith("${") && source.endsWith("}") && !source.contains("$[")) {
-            mod = Ref.get(source);
-            type = Type.REF;
-            return;
+            try {
+                mod = Ref.get(source);
+                type = Type.REF;
+                return;
+            } catch (Exception e) {
+                char[] chr = source.toCharArray();
+                int deep = 0; //深度
+                for (int i = 0; i < chr.length; i++) {
+                    //遇到Ref头符号则深度+1
+                    if (chr[i] == '$' && chr[i + 1] == '{' && deep == 0) {
+                        deep++;
+                    }
+
+                    //遇到Ref终止符号则深度-1
+                    if (chr[i] == '}') {
+                        deep--;
+                        if (deep == 0) {
+                            if (i == chr.length - 1) {
+                                throw new RuntimeException(e);
+                            }
+                            type = Type.FMT_A;
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         int dol = source.indexOf("$", -1);
 
-        if (source.toCharArray()[dol + 1] == '{') {
+        //排除正则表达式的影响
+        if (dol != -1 && source.toCharArray()[dol + 1] == '{') {
             type = Type.FMT_A;
         }
 
-        if (source.toCharArray()[dol + 1] == '[') {
+        if (dol != -1 && source.toCharArray()[dol + 1] == '[') {
             type = Type.FMT_B;
         }
 
@@ -90,7 +137,7 @@ public class ComputeText implements Ref {
                 }
             }
 
-            if (deep!=0) {
+            if (deep != 0) {
                 throw new IllegalArgumentException("参数解析失败!原因:发现未闭合的计算块");
             }
 
@@ -128,7 +175,7 @@ public class ComputeText implements Ref {
                 }
             }
 
-            if (deep!=0) {
+            if (deep != 0) {
                 throw new IllegalArgumentException("参数解析失败!原因:发现未闭合的取值表达式");
             }
 
@@ -215,13 +262,13 @@ public class ComputeText implements Ref {
             case JSON -> {
                 return JSON.parse(source);
             }
-            case FMT_A,FMT_B -> {
+            case FMT_A, FMT_B -> {
                 Object[] str = new String[args.size()];
 
                 for (int i = 0; i < args.size(); i++) {
                     str[i] = args.get(i).eval(root).toString();
                 }
-                return new ComputeText(String.format(template,str)).eval(root);
+                return new ComputeText(String.format(template, str)).eval(root);
             }
         }
         return source;
@@ -240,6 +287,8 @@ public class ComputeText implements Ref {
         MATH,
         JSON,
         REF,
+
+        REGEX,
 
         FMT_A,
         FMT_B,

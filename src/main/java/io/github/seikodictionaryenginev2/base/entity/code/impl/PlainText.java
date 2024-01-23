@@ -25,6 +25,6 @@ public class PlainText extends DictionaryCode {
     }
 
     public String render(BasicRuntime<?, ?, ?> runtime) {
-        return text.eval(runtime.getRuntimeObject()).toString();
+        return text.eval(runtime.getRuntimeObject()).toString().replace("\\n","\n");
     }
 }
