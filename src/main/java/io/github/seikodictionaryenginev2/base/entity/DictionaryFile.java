@@ -224,7 +224,7 @@ public class DictionaryFile {
                             }
                             dictionaryCodes.add(func);
                         } catch (Throwable e) {
-                            throw new DictionaryOnLoadException("解析伪代码方法时出错!" + "(" + iterator.getLen() + ":" + comm + ")", e);
+                            throw new DictionaryOnLoadException(String.format("解析词库文件'%s(%s:%d)'时遇到错误!", getFile().getName(), getFather().getName(), iterator.getLen()), e);
                         }
                     } else if (comm.contains("<-") && !comm.contains("\\<-")) {
                         //检测模板表达式，然后装载
