@@ -35,16 +35,24 @@ public class DICList extends ArrayList<DictionaryProject> {
         for (File p : Objects.requireNonNull(DictionaryEnvironment.getInstance().getDicRoot().listFiles())) {
             DICParseResult result = new DICParseResult();
             result.dicName = p.getName();
+
+
+            DictionaryProject project;
             try {
-                DictionaryProject project = new DictionaryProject(p);
-                project.init();
-                add(project);
+                project = new DictionaryProject(p);
             } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                project.init();
+            } catch (Throwable e) {
                 result.success = false;
                 result.err = e;
             }
+            add(project);
             results.add(result);
         }
+
         return results;
     }
 

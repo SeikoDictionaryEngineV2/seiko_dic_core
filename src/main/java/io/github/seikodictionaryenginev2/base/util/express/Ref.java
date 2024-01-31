@@ -79,7 +79,7 @@ public interface Ref {
         }
 
         //循环终止后缓冲区可能不为空
-        if (!buf.isEmpty()) {
+        if (buf.length() != 0) {
             splits.add(buf);
         }
 
