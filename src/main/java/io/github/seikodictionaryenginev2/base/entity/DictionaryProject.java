@@ -65,7 +65,7 @@ public class DictionaryProject {
             if (file.isDirectory()) {
                 continue;
             }
-            if (file.getName().equals("index.txt")) {
+            if (file.getName().equals("index.seiko")) {
                 indexFile = new DictionaryFile(this, file);
                 indexFile.parseDICCodeFile();
                 continue;
@@ -76,7 +76,7 @@ public class DictionaryProject {
         }
 
         if (indexFile == null) {
-            throw new IOException(String.format("词库'%s'未包括'index.txt',请在'%s'目录下创建index.txt文件!", rootFile.getName(), rootFile.getName()));
+            throw new IOException(String.format("词库'%s'未包括'index.seiko',请在'%s'目录下创建index.seiko文件!", rootFile.getName(), rootFile.getName()));
         }
     }
 
