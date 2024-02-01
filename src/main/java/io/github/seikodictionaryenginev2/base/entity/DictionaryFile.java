@@ -173,10 +173,12 @@ public class DictionaryFile {
                 comm = comm.replaceFirst(prefix, ""); //解空格,使用first防止多余的空格被替换
 
                 if (comm.startsWith("如果:")) {
-//                    System.out.println(iterator.getLen() + ":" + comm);
-//                    getAllElement(iterator, deep + 1);
                     ConditionalExpression expression = new ConditionalExpression(iterator.getLen(), comm);
                     expression.setSuccess(getAllElement(iterator, deep + 1));
+                    if (iterator.isEnd()) { //如果分支中恰好解析完毕整个词库，这个时候就没必要解析如果尾了
+                        dictionaryCodes.add(expression);
+                        continue;
+                    }
                     comm = iterator.now();
                     if (comm.startsWith(prefix + "如果尾")) {
                         iterator.next(); //如果尾需要排除
@@ -188,11 +190,15 @@ public class DictionaryFile {
 //                    getAllElement(iterator, deep + 1);
                     TryBlock tryBlock = new TryBlock(iterator.getLen(), comm);
                     tryBlock.setSuccess(getAllElement(iterator, deep + 1));
+                    if (iterator.isEnd()) { //如果分支中恰好解析完毕整个词库，这个时候就没必要解析捕获了
+                        dictionaryCodes.add(tryBlock);
+                        continue;
+                    }
                     comm = iterator.now();
                     if (comm.startsWith(prefix + "捕获")) {
 //                        iterator.next(); //捕获需要扔掉
                         if (!comm.replace(prefix + "捕获", "").replace(":", "").isEmpty()) {
-                            tryBlock.setExceptionVarName(iterator.previewNext().replace(prefix + "捕获:", ""));
+                            tryBlock.setExceptionVarName(comm.replace(prefix + "捕获:", ""));
                         }
                         iterator.next();
                         tryBlock.setFailed(getAllElement(iterator, deep + 1));

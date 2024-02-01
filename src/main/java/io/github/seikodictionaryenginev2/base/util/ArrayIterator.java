@@ -52,4 +52,8 @@ public class ArrayIterator<T> implements Iterator<T> {
     public T now() {
         return array[len];
     }
+
+    public boolean isEnd() {
+        return len == array.length;
+    }
 }
