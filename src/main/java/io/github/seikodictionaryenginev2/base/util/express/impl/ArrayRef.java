@@ -83,6 +83,28 @@ public class ArrayRef implements Ref {
         } else {
             o = (List<Object>) arr.eval(data);
         }
-        o.add(Integer.parseInt(index.eval(root).toString()), value);
+
+        //a(0)：替换下标为0的内容
+        //a(add)：在末尾添加
+        //a(add1)：在下标为1后添加
+
+        String cmd = index.eval(root).toString();
+
+        if (cmd.startsWith("add")) {
+            try {
+                int pos = Integer.parseInt(cmd.substring(3));
+                o.add(pos, value);
+            } catch (Exception ignored) {
+                o.add(value);
+            }
+            return;
+        }
+
+        try {
+            int pos = Integer.parseInt(cmd);
+            o.set(pos, value);
+        } catch (Exception ignored) {
+            throw new IllegalArgumentException("不合法的下标:" + cmd);
+        }
     }
 }

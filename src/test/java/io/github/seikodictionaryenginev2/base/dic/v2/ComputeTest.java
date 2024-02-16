@@ -1,6 +1,7 @@
 package io.github.seikodictionaryenginev2.base.dic.v2;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.github.seikodictionaryenginev2.base.util.DictionaryUtil;
 import io.github.seikodictionaryenginev2.base.util.calc.ComputeText;
@@ -221,6 +222,29 @@ public class ComputeTest {
         x = new ComputeText("[0-9]+");
         s = x.eval(null).toString();
 
+    }
+
+    @Test
+    void testArrayInsert() {
+        JSONObject o = new JSONObject() {{
+            put("a",new JSONObject() {{
+                put("b",1);
+                put("c",new JSONArray() {{
+                    add(1);
+                    add(2);
+                }});
+            }});
+        }};
+        ComputeText t0 = new ComputeText("${a.c}");
+
+
+        ComputeText t1 = new ComputeText("${a.c(0)}");
+        t1.insert(o,3);
+        ComputeText t2 = new ComputeText("${a.c(add)}");
+        t2.insert(o,1);
+        ComputeText t3 = new ComputeText("${a.c(add3)}");
+        t3.insert(o,0);
+        System.out.println(t0.eval(o));
     }
 
 }
