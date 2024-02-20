@@ -32,6 +32,8 @@ public class DictionaryProject {
     //词库导入的自定义函数
     private final HashMap<String, Class<? extends Function>> imports = new HashMap<>();
 
+    private boolean inited = false;
+
     public DictionaryProject(File rootFile) throws IOException {
         this.rootFile = rootFile;
         //支持单词库加载
@@ -55,9 +57,14 @@ public class DictionaryProject {
     }
 
     public void init() throws IOException {
+        inited = false;
+        indexFile = null;
+        subFile.clear();
+
         if (isSimpleDictionary) {
             indexFile = new DictionaryFile(this, rootFile);
             indexFile.parseDICCodeFile();
+            inited = true;
             return;
         }
 
@@ -78,6 +85,7 @@ public class DictionaryProject {
         if (indexFile == null) {
             throw new IOException(String.format("词库'%s'未包括'index.seiko',请在'%s'目录下创建index.seiko文件!", rootFile.getName(), rootFile.getName()));
         }
+        inited = true;
     }
 
     //返回词库工程的名字
@@ -99,5 +107,9 @@ public class DictionaryProject {
 
     public HashMap<String, Class<? extends Function>> getImports() {
         return imports;
+    }
+
+    public boolean isInited() {
+        return inited;
     }
 }
