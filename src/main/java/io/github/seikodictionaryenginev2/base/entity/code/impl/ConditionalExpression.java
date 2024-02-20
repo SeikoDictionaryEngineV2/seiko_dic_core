@@ -16,14 +16,15 @@ public class ConditionalExpression extends Expression.If {
     private List<DictionaryCode> failed;
 
     @Override
+    @SuppressWarnings("all")
     public <T> boolean calc(BasicRuntime<T,?,?> runtime) {
         boolean result = super.calc(runtime);
         if (result) {
-            if (success != null) {
+            if (success != null && success.size() == 0) {
                 runtime.invoke(success,false);
             }
         } else {
-            if (failed != null) {
+            if (failed != null && failed.size() == 0) {
                 runtime.invoke(failed,false);
             }
         }
