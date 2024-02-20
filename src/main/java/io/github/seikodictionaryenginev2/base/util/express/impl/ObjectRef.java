@@ -18,13 +18,13 @@ public class ObjectRef implements Ref {
     }
 
     @Override
-    public Object eval(Map<String, Object> data,final Map<String,Object> root) {
+    public Object eval(Map<String, Object> data, final Map<String, Object> root) {
         return data.get(key);
     }
 
     @Override
-    public void insert(Map<String, Object> data,Map<String,Object> root, Object value) {
-        data.put(key,value);
+    public void insert(Map<String, Object> data, Map<String, Object> root, Object value) {
+        data.put(key, value);
     }
 
     @Override

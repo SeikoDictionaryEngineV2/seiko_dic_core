@@ -37,7 +37,7 @@ public class FormatRef implements Ref {
             }
 
             //遇到Ref终止符号则深度-1
-            if (chr[i] == '}') {
+            if (chr[i] == '}' && deep != 0) {
                 deep--;
                 //若深度恰好为0证明一个Ref字符串已解析完毕
                 if (deep == 0) {

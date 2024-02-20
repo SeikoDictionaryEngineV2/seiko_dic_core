@@ -25,14 +25,15 @@ import java.util.Map;
  * @date 2023/8/28 20:43
  **/
 public class ComputeText implements Ref {
-    private String source;
+    private final String source;
     private Type type;
     private Ref mod;
 
+    private boolean isNonPureJSON = false;
 
     //为FMT_A和FMT_B时的格式化参数
     private String template;
-    private List<Ref> args = new ArrayList<>();
+    private final List<Ref> args = new ArrayList<>();
 
     public ComputeText(String source) {
         this.source = source;
@@ -40,7 +41,8 @@ public class ComputeText implements Ref {
         try {
             JSON.parse(source);
             type = Type.JSON;
-            return;
+            isNonPureJSON = true;
+//            return;
         } catch (JSONException ignored) {
         }
 
@@ -128,7 +130,7 @@ public class ComputeText implements Ref {
                 }
 
                 //遇到Ref终止符号则深度-1
-                if (chr[i] == ']') {
+                if (chr[i] == ']' && deep != 0) {
                     deep--;
                     //若深度恰好为0证明一个Ref字符串已解析完毕
                     if (deep == 0) {
@@ -244,6 +246,9 @@ public class ComputeText implements Ref {
         }
         switch (type) {
             case REF -> {
+                if (isNonPureJSON) {
+                    return JSON.parse(mod.eval(data, root).toString());
+                }
                 return mod.eval(data, root);
             }
             case MATH -> {

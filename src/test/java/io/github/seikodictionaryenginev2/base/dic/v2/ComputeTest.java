@@ -197,6 +197,17 @@ public class ComputeTest {
     }
 
     @Test
+    void testJSONWithComputeText() {
+        JSONObject o = new JSONObject() {{
+           put("参数",new JSONArray() {{
+               add("0");
+           }});
+        }};
+        ComputeText t = new ComputeText("{\"uid\":\"${参数(0)}\"}");
+        assertEquals(JSONObject.class,t.eval(o).getClass());
+    }
+
+    @Test
     void testFakeRef() {
         ComputeText x = new ComputeText("${a} is ${b}");
         String s = x.eval(new JSONObject() {{
