@@ -29,8 +29,6 @@ public class ComputeText implements Ref {
     private Type type;
     private Ref mod;
 
-    private boolean isNonPureJSON = false;
-
     //为FMT_A和FMT_B时的格式化参数
     private String template;
     private final List<Ref> args = new ArrayList<>();
@@ -41,7 +39,6 @@ public class ComputeText implements Ref {
         try {
             JSON.parse(source);
             type = Type.JSON;
-            isNonPureJSON = true;
 //            return;
         } catch (JSONException ignored) {
         }
@@ -246,9 +243,6 @@ public class ComputeText implements Ref {
         }
         switch (type) {
             case REF -> {
-                if (isNonPureJSON) {
-                    return JSON.parse(mod.eval(data, root).toString());
-                }
                 return mod.eval(data, root);
             }
             case MATH -> {
